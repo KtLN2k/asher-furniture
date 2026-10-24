@@ -3,8 +3,8 @@ import { CATEGORY_KEYS } from "./catalog";
 
 /**
  * המודל המרכזי של רהיט. מסמך JSON אחד לכל פריט רהיט, גרסתי (schemaVersion).
- * כל הסעיפים אופציונליים: שלב א׳ ממלא רק את `category`; שלב ב׳ ימלא את שאר הסעיפים
- * (ושלב ג׳ ייצור תצוגת 3D מאותו מסמך). אין כאן ערכי ברירת מחדל מומצאים.
+ * כל הסעיפים אופציונליים. הממשק, תצוגת התלת-ממד, הבדיקות והסיכום נגזרים כולם מאותו מסמך.
+ * פריטי ספרייה (חומרים, גימורים, צבעים) מופיעים כאן כמזהים בלבד.
  * מידות נשמרות במ״מ (מספרים שלמים); הממשק מציג ס״מ.
  */
 export const dimensionsSchema = z.object({
@@ -13,21 +13,44 @@ export const dimensionsSchema = z.object({
   depthMm: z.number().int().positive(),
 });
 
+export const PLACEMENTS = ["floor", "wall-hung", "legs"] as const;
+export const BASES = ["plinth", "legs", "none"] as const;
+export const DOOR_TYPES = ["hinged", "sliding", "flap", "none"] as const;
+export const DOOR_STYLES = ["flat", "framed", "grooved", "glass", "mirror"] as const;
+export const HANDLE_TYPES = ["standard", "long", "knob", "integral", "profile", "push", "none"] as const;
+export const HANDLE_COLORS = ["black", "steel", "brass", "white"] as const;
+export const HANDLE_POSITIONS = ["auto", "top", "middle", "bottom"] as const;
+export const OPENINGS = ["left", "right", "up", "down"] as const;
+export const ROD_TYPES = ["none", "short", "long"] as const;
+
+export type Placement = (typeof PLACEMENTS)[number];
+export type BaseType = (typeof BASES)[number];
+export type DoorType = (typeof DOOR_TYPES)[number];
+export type DoorStyle = (typeof DOOR_STYLES)[number];
+export type HandleType = (typeof HANDLE_TYPES)[number];
+export type HandleColor = (typeof HANDLE_COLORS)[number];
+export type HandlePosition = (typeof HANDLE_POSITIONS)[number];
+export type Opening = (typeof OPENINGS)[number];
+export type RodType = (typeof ROD_TYPES)[number];
+
 export const structureSchema = z.object({
-  doorCount: z.number().int().min(0).optional(),
-  unitCount: z.number().int().min(1).optional(),
-  placement: z.enum(["floor", "wall-hung", "legs"]).optional(),
-  base: z.enum(["plinth", "legs", "none"]).optional(),
+  doorCount: z.number().int().min(0).max(16).optional(),
+  unitCount: z.number().int().min(1).max(12).optional(),
+  placement: z.enum(PLACEMENTS).optional(),
+  base: z.enum(BASES).optional(),
+  baseHeightMm: z.number().int().min(0).max(400).optional(),
+  mountHeightMm: z.number().int().min(0).max(2000).optional(),
   installation: z.enum(["freestanding", "niche"]).optional(),
 });
 
 export const compartmentSchema = z.object({
   id: z.string(),
-  widthShare: z.number().positive().optional(),
-  kind: z.string().optional(),
-  shelves: z.number().int().min(0).optional(),
-  drawers: z.number().int().min(0).optional(),
-  hangingRod: z.enum(["none", "short", "long"]).optional(),
+  /** חלק יחסי מהרוחב הפנימי. כל החלקים מנורמלים כך שסכומם 1. */
+  widthShare: z.number().positive(),
+  shelves: z.number().int().min(0).max(30),
+  drawers: z.number().int().min(0).max(12),
+  hangingRod: z.enum(ROD_TYPES),
+  /** תא פתוח בקצה הארון: בלי דלת בחזית. */
   open: z.boolean().optional(),
 });
 
@@ -36,30 +59,42 @@ export const interiorSchema = z.object({
   compartments: z.array(compartmentSchema).optional(),
 });
 
-export const facadeSchema = z.object({
-  id: z.string(),
-  target: z.enum(["door", "drawer", "open-compartment"]),
-  doorType: z.enum(["hinged", "sliding", "flap", "none"]).optional(),
-  style: z.string().optional(),
-  handle: z.string().optional(),
-  handlePosition: z.string().optional(),
-  opening: z.enum(["left", "right", "up", "down"]).optional(),
-  materialId: z.string().optional(),
+/** הגדרות חזית שאפשר לדרוס לכל דלת/מגירה. ערך חסר = ברירת המחדל של הרהיט. */
+export const facadeOverrideSchema = z.object({
+  style: z.enum(DOOR_STYLES).optional(),
+  handle: z.enum(HANDLE_TYPES).optional(),
+  handleColor: z.enum(HANDLE_COLORS).optional(),
+  handlePosition: z.enum(HANDLE_POSITIONS).optional(),
+  opening: z.enum(OPENINGS).optional(),
   colorId: z.string().optional(),
 });
 
+export const facadeSchema = facadeOverrideSchema.extend({
+  id: z.string(),
+  target: z.enum(["door", "drawer", "open-compartment"]),
+});
+
 export const facadesSchema = z.object({
+  doorType: z.enum(DOOR_TYPES).optional(),
+  /** ברירת מחדל לכל הדלתות. */
+  defaults: facadeOverrideSchema.optional(),
+  /** ברירת מחדל לכל חזיתות המגירות. */
+  drawerDefaults: facadeOverrideSchema.optional(),
   doors: z.array(facadeSchema).optional(),
+  drawers: z.array(facadeSchema).optional(),
 });
 
 export const materialsSelectionSchema = z.object({
   bodyMaterialId: z.string().optional(),
-  facadeMaterialId: z.string().optional(),
-  backMaterialId: z.string().optional(),
-  thicknessMm: z.number().int().positive().optional(),
-  finishId: z.string().optional(),
+  bodyFinishId: z.string().optional(),
   bodyColorId: z.string().optional(),
+  thicknessMm: z.number().int().positive().optional(),
+  facadeMaterialId: z.string().optional(),
+  facadeFinishId: z.string().optional(),
   facadeColorId: z.string().optional(),
+  facadeThicknessMm: z.number().int().positive().optional(),
+  backMaterialId: z.string().optional(),
+  backThicknessMm: z.number().int().positive().optional(),
 });
 
 const designSections = {
