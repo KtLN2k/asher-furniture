@@ -22,6 +22,7 @@ export function applyPatch(project: Project, patch: ProjectPatch, extras: LocalE
   if (patch.status !== undefined) next.status = patch.status;
   if (patch.notes !== undefined) next.notes = patch.notes;
   if (patch.wizardStep !== undefined) next.wizardStep = patch.wizardStep;
+  if (patch.thumbnail !== undefined) next.thumbnail = patch.thumbnail;
   if (patch.archived !== undefined) next.archivedAt = patch.archived ? (project.archivedAt ?? new Date().toISOString()) : null;
   if (patch.design) {
     next.design = mergeDesign(project.design, patch.design);

@@ -77,7 +77,7 @@ function Inner({ planner, project, session, goTo }: SummaryProps) {
   return (
     <div className="flex flex-col gap-6" data-testid="step-summary">
       <div className="h-[22rem] md:h-[30rem]">
-        <LazyViewer design={design} library={library} name={project.name || "רהיטי-אשר"} className="h-full" />
+        <LazyViewer design={design} library={library} name={project.name || "רהיטי-אשר"} className="h-full" room={planner.room} onRoomChange={planner.setRoom} onRendered={planner.saveThumbnail} />
       </div>
 
       {warnings.length > 0 && <IssueList issues={warnings} />}

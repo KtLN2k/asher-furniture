@@ -18,7 +18,7 @@ import { resolveSpec } from "./spec";
  * פעולות עריכה טהורות על מודל הרהיט. כל פעולה מחזירה עדכון חלקי (סעיפים שהשתנו) שמוכן לשמירה.
  * כך כל כלל (למשל התאמת מספר הדלתות לרוחב) חי במקום אחד, ונבדק ביחידות.
  */
-export type SectionPatch = Partial<Pick<FurnitureDesign, "dimensions" | "structure" | "interior" | "facades" | "materials">>;
+export type SectionPatch = Partial<Pick<FurnitureDesign, "dimensions" | "structure" | "interior" | "facades" | "materials" | "presentation">>;
 
 export function categoryDefaults(category: CategoryKey, library: Library | null): SectionPatch {
   const caps = capsFor(category);

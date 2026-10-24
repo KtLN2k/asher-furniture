@@ -16,6 +16,19 @@ export interface QualitySettings {
   bump: boolean;
   /** מראה זכוכית/מראה עם השתקפות סביבה. */
   reflections: boolean;
+  /** גודל טקסטורת הרצפה והקירות (פיקסלים). */
+  floorTextureSize: number;
+  /** גודל קובייה לבדיקת השתקפות חדר אמיתי (0 = כבוי): מראה וחזיתות מבריקות משקפות את החדר. */
+  probeSize: number;
+  /** חסימת אור סביבתית (GTAO) ומעבד תמונה: רק באיכות גבוהה. */
+  ao: boolean;
+  /** השתקפות הרצפה ברהיט (מחזירור). */
+  floorReflection: boolean;
+  /** שכבת לק עדינה לחזיתות (MeshPhysicalMaterial). */
+  clearcoat: boolean;
+  /** חיתוך קצוות מעוגל של חזיתות: 0 כבוי, אחרת מספר מקטעים. */
+  bevelSegments: number;
+  shadowType: "percentage" | "variance";
 }
 
 export const TIER_LABELS: Record<Tier, string> = { high: "גבוהה", medium: "בינונית", low: "נמוכה" };
@@ -34,6 +47,13 @@ export const QUALITY_PRESETS: Record<Tier, QualitySettings> = {
     textureSize: 1024,
     bump: true,
     reflections: true,
+    floorTextureSize: 2048,
+    probeSize: 256,
+    ao: true,
+    floorReflection: true,
+    clearcoat: true,
+    bevelSegments: 2,
+    shadowType: "variance",
   },
   medium: {
     tier: "medium",
@@ -48,6 +68,13 @@ export const QUALITY_PRESETS: Record<Tier, QualitySettings> = {
     textureSize: 512,
     bump: true,
     reflections: true,
+    floorTextureSize: 1024,
+    probeSize: 128,
+    ao: false,
+    floorReflection: false,
+    clearcoat: true,
+    bevelSegments: 1,
+    shadowType: "percentage",
   },
   low: {
     tier: "low",
@@ -62,6 +89,13 @@ export const QUALITY_PRESETS: Record<Tier, QualitySettings> = {
     textureSize: 256,
     bump: false,
     reflections: false,
+    floorTextureSize: 512,
+    probeSize: 0,
+    ao: false,
+    floorReflection: false,
+    clearcoat: false,
+    bevelSegments: 0,
+    shadowType: "percentage",
   },
 };
 

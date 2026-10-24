@@ -174,6 +174,7 @@ export class SqlRepository implements Repository {
       if (patch.status !== undefined) set("status", patch.status);
       if (patch.notes !== undefined) set("notes", patch.notes);
       if (patch.wizardStep !== undefined) set("wizard_step", patch.wizardStep);
+      if (patch.thumbnail !== undefined) set("thumbnail", patch.thumbnail);
       if (patch.customerId !== undefined) {
         if (patch.customerId) await this.assertCustomer(tx, patch.customerId);
         set("customer_id", patch.customerId);
