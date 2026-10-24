@@ -57,7 +57,7 @@ export function HomeView() {
                 className="group block overflow-hidden rounded-card border border-sand-200 bg-white shadow-card transition hover:border-wood-400 hover:shadow-lift"
               >
                 <CategoryArt category={c.key} className="aspect-[4/3] w-full" />
-                <span className="block px-3 py-3 text-center text-lg font-bold">{c.label}</span>
+                <span className="flex min-h-16 items-center justify-center px-3 py-2 text-center text-lg font-bold leading-tight">{c.label}</span>
               </Link>
             </li>
           ))}
