@@ -79,7 +79,7 @@ function Inner({ planner }: PlannerStepProps) {
 
       <Block title={`תא ${sel + 1} מתוך ${spec.compartments.length}`} testId="compartment-editor">
         <Card className="flex flex-col gap-5 p-4">
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(12.5rem,1fr))] gap-4">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(14rem,1fr))] gap-4">
             <NumberStepper
               label="רוחב התא"
               testId="comp-width-input"

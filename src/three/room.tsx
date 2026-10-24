@@ -10,12 +10,13 @@ export interface RoomProps {
   height: number;
   depth: number;
   bottom: number;
+  niche?: boolean;
   q: QualitySettings;
   enabled: boolean;
 }
 
 /** חדר ברירת מחדל: רצפת פרקט, קיר אפור וסוקל. כבוי: רק משטח שמקבל צל. */
-export function Room({ width, height, depth, bottom, q, enabled }: RoomProps) {
+export function Room({ width, height, depth, bottom, niche, q, enabled }: RoomProps) {
   const zWall = -depth / 2 - 0.002;
   const wallW = Math.max(9, width + 5);
   const wallH = Math.max(2.9, bottom + height + 0.5);
@@ -78,6 +79,13 @@ export function Room({ width, height, depth, bottom, q, enabled }: RoomProps) {
         <boxGeometry args={[wallW, 0.09, 0.018]} />
         <meshStandardMaterial color="#ecebe7" roughness={0.6} />
       </mesh>
+      {niche &&
+        [-1, 1].map((side) => (
+          <mesh key={side} position={[side * (width / 2 + 0.002), wallH / 2, -depth / 2 + 1.5]} rotation={[0, -side * (Math.PI / 2), 0]} receiveShadow>
+            <planeGeometry args={[3, wallH]} />
+            <meshStandardMaterial color="#6c6e72" roughness={0.96} metalness={0} />
+          </mesh>
+        ))}
     </group>
   );
 }

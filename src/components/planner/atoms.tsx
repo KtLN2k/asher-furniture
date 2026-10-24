@@ -91,11 +91,11 @@ export function NumberStepper({
               }
             }}
             className={cn(
-              "min-h-12 w-full rounded-control border bg-white px-11 text-center text-xl font-bold tabular-nums text-ink-900 transition focus:border-wood-500 focus:outline-none focus:ring-4 focus:ring-wood-100",
+              "min-h-12 w-full rounded-control border bg-white px-2 text-center text-xl font-bold tabular-nums text-ink-900 transition focus:border-wood-500 focus:outline-none focus:ring-4 focus:ring-wood-100",
               error ? "border-danger-600" : "border-sand-300",
             )}
           />
-          {unit && <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-sm text-ink-500">{unit}</span>}
+          {unit && <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-xs text-ink-500">{unit}</span>}
         </div>
         <button type="button" className={btn} aria-label={`הגדלת ${label}`} onClick={() => bump(1)} disabled={value >= max}>
           <Plus className="size-5" aria-hidden />

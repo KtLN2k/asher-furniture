@@ -81,7 +81,7 @@ export interface MovingPart {
 export interface FurnitureModel {
   fixed: ModelNode[];
   moving: MovingPart[];
-  bounds: { width: number; height: number; depth: number; bottom: number };
+  bounds: { width: number; height: number; depth: number; bottom: number; niche: boolean };
   stats: {
     doors: number;
     drawers: number;
@@ -314,7 +314,7 @@ export function buildFurnitureModel(design: FurnitureDesign, opts: ModelOptions)
   return {
     fixed,
     moving,
-    bounds: { width: m(W), height: m(spec.heightMm), depth: m(D), bottom: m(spec.mountHeightMm) },
+    bounds: { width: m(W), height: m(spec.heightMm), depth: m(D), bottom: m(spec.mountHeightMm), niche: design.structure?.installation === "niche" },
     stats: {
       doors: layout.doors.length,
       drawers: layout.drawers.length,

@@ -6,21 +6,52 @@ import { useAsync } from "@/lib/use-async";
 import type { ShopSettings } from "@/domain/project";
 import { PageContainer, PageHeader } from "./shell/page";
 import { Button } from "./ui/button";
+import { cn } from "./ui/cn";
+import { LibraryEditor } from "./settings/library-editor";
+import { LimitsEditor } from "./settings/limits-editor";
 import { Field, TextInput } from "./ui/field";
 import { Card, ErrorNotice, LoadingBlock } from "./ui/misc";
 import { useToast } from "./ui/toast";
 
+const TABS = [
+  { key: "shop", label: "פרטי העסק" },
+  { key: "library", label: "ספריית חומרים" },
+  { key: "limits", label: "מגבלות מידות" },
+] as const;
+
 export function SettingsView() {
   const s = useAsync(() => api.getSettings(), []);
+  const [tab, setTab] = useState<(typeof TABS)[number]["key"]>("shop");
   return (
     <PageContainer>
-      <PageHeader title="הגדרות" subtitle="פרטי העסק של הנגרייה." />
-      {s.loading && !s.data && <LoadingBlock />}
-      {s.error && <ErrorNotice message={s.error} onRetry={s.reload} />}
-      {s.data && <SettingsForm initial={s.data} />}
-      <p className="mt-6 max-w-xl text-ink-500">
-        ספריית חומרים, עוביי לוחות, גימורים, ידיות ומגבלות מידות יתווספו בשלב התכנון הבא.
-      </p>
+      <PageHeader title="הגדרות" subtitle="פרטי העסק, חומרים וגימורים, ומגבלות התכנון של הנגרייה." />
+      <div role="tablist" aria-label="אזורי הגדרות" className="mb-5 flex flex-wrap gap-2">
+        {TABS.map((t) => (
+          <button
+            key={t.key}
+            type="button"
+            role="tab"
+            aria-selected={tab === t.key}
+            data-testid={`settings-tab-${t.key}`}
+            onClick={() => setTab(t.key)}
+            className={cn(
+              "min-h-12 rounded-control border-2 px-5 text-lg font-semibold transition",
+              tab === t.key ? "border-wood-600 bg-wood-50 text-wood-700" : "border-sand-300 bg-white text-ink-700 hover:border-wood-400",
+            )}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+      {tab === "shop" && (
+        <>
+          {s.loading && !s.data && <LoadingBlock />}
+          {s.error && <ErrorNotice message={s.error} onRetry={s.reload} />}
+          {s.data && <SettingsForm initial={s.data} />}
+        </>
+      )}
+      {tab === "library" && <LibraryEditor />}
+      {tab === "limits" && <LimitsEditor />}
     </PageContainer>
   );
 }

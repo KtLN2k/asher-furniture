@@ -95,7 +95,7 @@ export function SceneContent({ model, q, openIds, onToggle, roomOn, view, viewNo
   const size = useThree((s) => s.size);
   const invalidate = useThree((s) => s.invalidate);
   const governor = useMemo(() => new FrameGovernor(), []);
-  const { width, height, depth, bottom } = model.bounds;
+  const { width, height, depth, bottom, niche } = model.bounds;
   const aspect = size.width / Math.max(1, size.height);
 
   const target = useMemo(() => new Vector3(0, bottom + height / 2, 0), [bottom, height]);
@@ -247,7 +247,7 @@ export function SceneContent({ model, q, openIds, onToggle, roomOn, view, viewNo
         <Lightformer form="rect" intensity={0.5} position={[0, -1, 0]} scale={[8, 8, 1]} rotation-x={-Math.PI / 2} color="#d6d2cb" />
       </Environment>
 
-      <Room width={width} height={height} depth={depth} bottom={bottom} q={q} enabled={roomOn} />
+      <Room width={width} height={height} depth={depth} bottom={bottom} niche={niche} q={q} enabled={roomOn} />
       <FurnitureMesh model={model} q={q} openIds={openIds} onToggle={onToggle} groupRef={furniture} />
       {q.contactShadows && (
         <ContactShadows

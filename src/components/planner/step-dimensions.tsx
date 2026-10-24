@@ -69,7 +69,7 @@ function Inner({ planner }: PlannerStepProps) {
       </Card>
 
       <Block title="מידות" hint="בס״מ. הטווח המותר לסוג הרהיט הזה מוצג מתחת לכל שדה.">
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(12.5rem,1fr))] gap-4">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(14rem,1fr))] gap-4">
           <NumberStepper
             label="רוחב"
             testId="dim-width-input"
@@ -110,7 +110,7 @@ function Inner({ planner }: PlannerStepProps) {
       </Block>
 
       <Block title="מבנה">
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(12.5rem,1fr))] gap-4">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(14rem,1fr))] gap-4">
           {hasDoors && (
             <NumberStepper
               label="מספר דלתות"
@@ -151,7 +151,7 @@ function Inner({ planner }: PlannerStepProps) {
             />
           ))}
         </CardGrid>
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(12.5rem,1fr))] gap-4">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(14rem,1fr))] gap-4">
           {spec.placement === "floor" && (
             <Segmented
               label="בסיס"
