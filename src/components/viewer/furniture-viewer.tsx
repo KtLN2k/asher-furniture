@@ -159,7 +159,7 @@ export default function FurnitureViewer({ design, library, name, compact, classN
         gl={{ antialias: q.antialias, powerPreference: "high-performance" }}
         onCreated={({ gl: renderer }) => {
           renderer.toneMapping = NeutralToneMapping;
-          renderer.toneMappingExposure = 1.12;
+          renderer.toneMappingExposure = 1.3;
           setReady(true);
         }}
         aria-label="תצוגת תלת-ממד של הרהיט"

@@ -157,21 +157,21 @@ export function parquetTexture(size: number, withBump: boolean): TexturePair {
     for (let row = -1; row <= rows; row++) {
       const x = col * plankW;
       const y = row * plankL + offset;
-      const f = 0.9 + rand() * 0.18;
+      const f = 0.95 + rand() * 0.1;
       ctx.fillStyle = rgb(base, f);
       ctx.fillRect(x, y, plankW, plankL);
       const streaks = Math.round(plankW / 2.2);
       for (let i = 0; i < streaks; i++) {
         const sx = x + rand() * plankW;
-        ctx.strokeStyle = rgb(base, f * (rand() < 0.5 ? 0.75 : 1.15), 0.08 + rand() * 0.14);
+        ctx.strokeStyle = rgb(base, f * (rand() < 0.5 ? 0.82 : 1.1), 0.06 + rand() * 0.1);
         ctx.lineWidth = 0.6 + rand() * 1.2;
         ctx.beginPath();
         ctx.moveTo(sx, y);
         ctx.bezierCurveTo(sx + (rand() - 0.5) * 6, y + plankL * 0.3, sx + (rand() - 0.5) * 6, y + plankL * 0.7, sx + (rand() - 0.5) * 3, y + plankL);
         ctx.stroke();
       }
-      ctx.fillStyle = "rgba(40,22,8,0.55)";
-      ctx.fillRect(x, y, plankW, 1.4);
+      ctx.fillStyle = "rgba(40,22,8,0.4)";
+      ctx.fillRect(x, y, plankW, 1.2);
       ctx.fillRect(x, y, 1.4, plankL);
       if (withBump) {
         bctx.fillStyle = "rgba(0,0,0,0.9)";

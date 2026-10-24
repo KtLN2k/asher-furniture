@@ -14,7 +14,8 @@ function NodeMesh({ node, q, part }: { node: ModelNode; q: QualitySettings; part
   const user = { kind: node.kind, part };
   if (node.type === "box") {
     const geometry = boxGeometry(node.size[0], node.size[1], node.size[2], node.grain, node.id.replace(/-\d+$/, "") + node.pos.map((v) => Math.round(v * 20)).join(","));
-    const mats = node.front ? [material, material, material, material, getMaterial(node.front, q), material] : material;
+    const edge = node.edge ? getMaterial(node.edge, q) : material;
+    const mats = node.front || node.edge ? [edge, edge, edge, edge, node.front ? getMaterial(node.front, q) : material, material] : material;
     return <mesh position={node.pos} geometry={geometry} material={mats} castShadow={shadow} receiveShadow={q.shadows} userData={user} dispose={null} />;
   }
   if (node.type === "cylinder") {

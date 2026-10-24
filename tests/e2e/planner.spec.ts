@@ -121,7 +121,7 @@ test.describe("תכנון רהיט מלא", () => {
     await page.getByTestId("handle-color-black").click();
     await expectScene(page, (s) => {
       expect(s.doorsInfo.every((d) => d.style === "flat" && d.handle === "long" && d.handleColor === "black")).toBe(true);
-      expect(s.handles).toBe(7);
+      expect(s.handles).toBe(4);
     });
 
     // שילוב לא מתאים מוסתר או מוסבר: חריצים לא מתאימים לדלתות הזזה

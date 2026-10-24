@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import type { Planner } from "../planner/use-planner";
 import { LazyViewer } from "../viewer/viewer-lazy";
 
@@ -26,10 +27,11 @@ export function PreviewPanel({ planner, name, desktop }: { planner: Planner; nam
   const common = { design: planner.design, library: planner.library, name };
 
   if (expanded) {
-    return (
+    return createPortal(
       <div role="dialog" aria-modal="true" aria-label="תצוגת תלת-ממד מוגדלת" className="fixed inset-0 z-50 bg-cream-50 p-2" data-testid="preview-expanded">
         <LazyViewer {...common} className="h-full rounded-control" expanded onExpand={() => setExpanded(false)} />
-      </div>
+      </div>,
+      document.body,
     );
   }
 

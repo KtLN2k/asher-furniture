@@ -34,6 +34,8 @@ export interface BoxNode {
   material: MaterialSpec;
   /** חומר מיוחד לפאה הקדמית (למשל מראה על דלת). */
   front?: MaterialSpec;
+  /** חומר כהה יותר לארבעת צדי הלוח: יוצר את צל הפער בין דלתות. */
+  edge?: MaterialSpec;
   grain: Grain;
   shadow: boolean;
 }
@@ -217,8 +219,9 @@ export function buildFurnitureModel(design: FurnitureDesign, opts: ModelOptions)
     const cy = (y0 + y1) / 2;
     const base = facadeMatFor(look.colorId);
     const out: ModelNode[] = [];
+    const edge = { ...base, key: `${base.key}|edge`, hex: shade(base.hex, 0.6) };
     const part = (suffix: string, sx: number, sy: number, sz: number, px: number, py: number, pz: number, material: MaterialSpec, extra: Partial<BoxNode> = {}) =>
-      out.push(box(`${kind}-${suffix}`, v3(sx, sy, sz), v3(px, py, pz), material, "y", extra));
+      out.push(box(`${kind}-${suffix}`, v3(sx, sy, sz), v3(px, py, pz), material, "y", material === base ? { edge, ...extra } : extra));
     switch (look.style) {
       case "framed": {
         const fw = Math.min(70, w / 4, h / 4);
@@ -263,8 +266,9 @@ export function buildFurnitureModel(design: FurnitureDesign, opts: ModelOptions)
 
   // דלתות
   const doorType = spec.doorType;
+  const doorLooks = layout.doors.map((d) => resolveFacade(design, "door", d.id, d.index, doorType, avail, spec.doorCount));
   layout.doors.forEach((d: DoorLayout) => {
-    const look = resolveFacade(design, "door", d.id, d.index, doorType, avail);
+    const look = doorLooks[d.index];
     const faceZ = d.zCenter + tf / 2;
     const nodes: ModelNode[] = facePanel("door", look, d.x0, d.x1, d.y0, d.y1, d.zCenter);
     let pivot: Vec3;
@@ -286,7 +290,10 @@ export function buildFurnitureModel(design: FurnitureDesign, opts: ModelOptions)
       motion = { type: "hinge", axis: "y", openAngle: left ? -1.8 : 1.8 };
       freeEdge = left ? "right" : "left";
     }
-    nodes.push(...handleNodes(look, { x0: d.x0, x1: d.x1, y0: d.y0, y1: d.y1, faceZ, freeEdge, floorY: 0, orientation: doorType === "flap" ? "h" : "v", kind: "door", thicknessMm: tf }));
+    // ידית ארוכה במפגש בין שתי דלתות מותקנת פעם אחת בלבד (על הדלת הראשונה בזוג), כמו בהדמיות של ארונות כאלה.
+    const prev = doorLooks[d.index - 1];
+    const sharedEdge = doorType === "hinged" && look.handle === "long" && freeEdge === "left" && prev?.handle === "long" && prev.opening === "left";
+    if (!sharedEdge) nodes.push(...handleNodes(look, { x0: d.x0, x1: d.x1, y0: d.y0, y1: d.y1, faceZ, freeEdge, floorY: 0, orientation: doorType === "flap" ? "h" : "v", kind: "door", thicknessMm: tf }));
     moving.push({ id: `door-${d.index + 1}`, kind: "door", facadeId: d.id, index: d.index, pivot, motion, exposed: true, children: rel(nodes, pivot), look });
   });
 
@@ -414,7 +421,7 @@ export function buildHandle(look: ResolvedFacade, r: HandleRect, nid: (k: string
   const y = handleY(look, r, len / 2 + 30);
   if (isLong) {
     const x = r.freeEdge === "left" ? r.x0 + 14 : r.x1 - 14;
-    addBox("handle", v3(14, len, 14), v3(x, y, r.faceZ + 7), metal);
+    addBox("handle", v3(10, len, 12), v3(x + (r.freeEdge === "left" ? -2 : 2), y, r.faceZ + 6), metal);
     return out;
   }
   addCyl("handle", 0.006, m(len), "y", v3(edgeX, y, zBar), metal);

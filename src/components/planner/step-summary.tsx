@@ -71,7 +71,7 @@ function Inner({ planner, project, session, goTo }: SummaryProps) {
     glass: itemById(library, "fac-glass")?.active ?? false,
     mirror: itemById(library, "fac-mirror")?.active ?? false,
   };
-  const doors = layout.doors.map((d) => resolveFacade(design, "door", d.id, d.index, spec.doorType, avail));
+  const doors = layout.doors.map((d) => resolveFacade(design, "door", d.id, d.index, spec.doorType, avail, spec.doorCount));
   const warnings = warningsOf(issues);
 
   return (

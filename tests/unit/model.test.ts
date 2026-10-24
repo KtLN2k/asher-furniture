@@ -39,14 +39,18 @@ describe("מודל תלת-ממד פרמטרי", () => {
     expect(bounds.bottom).toBe(0);
   });
 
-  it("ידית ארוכה לכל דלת: ידית אחת לדלת, ובלי ידית (לחיצה) אין צורה", () => {
+  it("ידית ארוכה במפגש בין זוג דלתות מותקנת פעם אחת, ובמספר אי-זוגי הדלת הראשונה עומדת לבד", () => {
     const base = design("wardrobes", (x) => setStructure(x, { doorCount: 4 }));
     const long = { ...base, facades: setFacadeDefaults(base.facades, "door", { handle: "long", handleColor: "black" }) };
-    expect(buildFurnitureModel(long, { library }).stats.handles).toBe(4);
+    expect(buildFurnitureModel(long, { library }).stats.handles).toBe(2);
+    const seven = { ...long, structure: { ...long.structure, doorCount: 7 } };
+    expect(buildFurnitureModel(seven, { library }).stats.handles).toBe(4);
+    const std = { ...base, facades: setFacadeDefaults(base.facades, "door", { handle: "standard" }) };
+    expect(buildFurnitureModel(std, { library }).stats.handles).toBe(4);
     const push = { ...base, facades: setFacadeDefaults(base.facades, "door", { handle: "push" }) };
     expect(buildFurnitureModel(push, { library }).stats.handles).toBe(0);
     const mixed = { ...long, facades: setFacadeOverride(long.facades, "door", "door-2", { handle: "none" }) };
-    expect(buildFurnitureModel(mixed, { library }).stats.handles).toBe(3);
+    expect(buildFurnitureModel(mixed, { library }).stats.handles).toBe(2);
   });
 
   it("דלתות ציר נפתחות על ציר אנכי, ודלתות הזזה בהזזה אופקית", () => {

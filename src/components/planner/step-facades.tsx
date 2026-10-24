@@ -60,7 +60,7 @@ function Inner({ planner }: PlannerStepProps) {
   const target = selId === "all" ? first : items.find((i) => i.id === selId)!;
   const hasTarget = Boolean(target);
 
-  const look = hasTarget ? resolveFacade(design, kind, target.id, target.index, spec.doorType, avail) : null;
+  const look = hasTarget ? resolveFacade(design, kind, target.id, target.index, spec.doorType, avail, spec.doorCount) : null;
   const facades = design.facades;
   const overrides = (kind === "door" ? facades?.doors : facades?.drawers)?.filter((o) => Object.keys(o).some((k) => k !== "id" && k !== "target")) ?? [];
 

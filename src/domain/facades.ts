@@ -31,7 +31,7 @@ export const HANDLE_INFO: Record<HandleType, { label: string; hint: string }> = 
 };
 
 export const HANDLE_COLOR_INFO: Record<HandleColor, { label: string; hex: string; metal: number; rough: number }> = {
-  black: { label: "שחור", hex: "#161616", metal: 0.55, rough: 0.38 },
+  black: { label: "שחור", hex: "#131313", metal: 0.2, rough: 0.42 },
   steel: { label: "נירוסטה", hex: "#c4c7cb", metal: 1, rough: 0.3 },
   brass: { label: "פליז", hex: "#b8924a", metal: 1, rough: 0.32 },
   white: { label: "לבן", hex: "#efeeea", metal: 0.1, rough: 0.5 },
@@ -122,9 +122,16 @@ export interface ResolvedFacade {
   colorId?: string;
 }
 
-/** פתיחה אוטומטית: זוגות דלתות נפגשים באמצע. */
-export function autoOpening(doorType: DoorType, index: number): Opening | null {
-  if (doorType === "hinged") return index % 2 === 0 ? "left" : "right";
+/**
+ * פתיחה אוטומטית. דלתות ציר מתחלקות לזוגות שנפגשים בקצה החופשי (שם הידית).
+ * במספר אי-זוגי הדלת הראשונה עומדת לבד עם ציר בצד ימין, כמו בארונות רבי-דלתות רגילים.
+ */
+export function autoOpening(doorType: DoorType, index: number, count = 0): Opening | null {
+  if (doorType === "hinged") {
+    const lone = count % 2 === 1;
+    if (lone && index === 0) return "right";
+    return (index - (lone ? 1 : 0)) % 2 === 0 ? "left" : "right";
+  }
   if (doorType === "flap") return "up";
   return null;
 }
@@ -145,6 +152,7 @@ export function resolveFacade(
   index: number,
   doorType: DoorType,
   avail: InsertAvailability = { glass: true, mirror: true },
+  doorCount = 0,
 ): ResolvedFacade {
   const f = design.facades;
   const defaults = (kind === "door" ? f?.defaults : f?.drawerDefaults) ?? {};
@@ -165,7 +173,7 @@ export function resolveFacade(
   if (kind === "door") {
     const allowed = openingOptions("door", doorType).map((o) => o.value);
     const wanted = pick("opening");
-    opening = wanted && allowed.includes(wanted) ? wanted : autoOpening(doorType, index);
+    opening = wanted && allowed.includes(wanted) ? wanted : autoOpening(doorType, index, doorCount);
   }
   return {
     id,

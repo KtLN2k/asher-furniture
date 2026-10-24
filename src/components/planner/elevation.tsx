@@ -140,7 +140,7 @@ export function ElevationSvg({ design, library, mode, selectedComp, onSelectComp
 
       {showDoors &&
         layout.doors.map((d) => {
-          const look = resolveFacade(design, "door", d.id, d.index, spec.doorType, avail);
+          const look = resolveFacade(design, "door", d.id, d.index, spec.doorType, avail, spec.doorCount);
           const fill = look.style === "mirror" ? `url(#${gid}-mirror)` : look.style === "glass" ? "#dbe9ee" : (look.colorId ? surfaceLook(library, look.colorId, design.materials?.facadeFinishId).hex : facadeBase.hex);
           const sel = isSel("door", d.id);
           const w = d.x1 - d.x0;

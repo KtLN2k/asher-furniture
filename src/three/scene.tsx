@@ -3,7 +3,7 @@
 import { CameraControls, ContactShadows, Environment, Lightformer } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, type Ref } from "react";
-import { Box3, Vector3, type Group, type Mesh, type Object3D } from "three";
+import { BackSide, Box3, Vector3, type Group, type Mesh, type Object3D } from "three";
 import type CameraControlsImpl from "camera-controls";
 import { FurnitureMesh } from "./furniture";
 import type { FurnitureModel } from "./model";
@@ -221,11 +221,11 @@ export function SceneContent({ model, q, openIds, onToggle, roomOn, view, viewNo
   return (
     <>
       <color attach="background" args={[roomOn ? "#d9d6d0" : "#efeae2"]} />
-      <hemisphereLight args={["#ffffff", "#b4aca2", 1.0]} />
+      <hemisphereLight args={["#ffffff", "#c9c5bf", 0.75]} />
       <directionalLight
         position={lightPos}
         intensity={2.2}
-        color="#fffaf3"
+        color="#ffffff"
         shadow-intensity={0.5}
         castShadow={q.shadows}
         shadow-mapSize={[q.shadowMapSize, q.shadowMapSize]}
@@ -240,8 +240,12 @@ export function SceneContent({ model, q, openIds, onToggle, roomOn, view, viewNo
         shadow-camera-far={16}
       />
       <Environment resolution={q.envResolution} frames={1} environmentIntensity={1.15}>
+        <mesh scale={40}>
+          <sphereGeometry args={[1, 24, 16]} />
+          <meshBasicMaterial color="#7d8083" side={BackSide} toneMapped={false} />
+        </mesh>
         <Lightformer form="rect" intensity={3.2} position={[0, 5, 3]} scale={[9, 3, 1]} rotation-x={Math.PI / 2} color="#ffffff" />
-        <Lightformer form="rect" intensity={2.2} position={[-5, 2.4, 1]} scale={[3, 4, 1]} rotation-y={Math.PI / 2} color="#fff8f0" />
+        <Lightformer form="rect" intensity={2.2} position={[-5, 2.4, 1]} scale={[3, 4, 1]} rotation-y={Math.PI / 2} color="#ffffff" />
         <Lightformer form="rect" intensity={1.4} position={[5, 1.8, 2]} scale={[2.5, 3, 1]} rotation-y={-Math.PI / 2} color="#dfe8ff" />
         <Lightformer form="ring" intensity={1.2} position={[0, 2, 6]} scale={3} color="#ffffff" />
         <Lightformer form="rect" intensity={0.5} position={[0, -1, 0]} scale={[8, 8, 1]} rotation-x={-Math.PI / 2} color="#d6d2cb" />
