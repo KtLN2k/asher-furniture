@@ -308,7 +308,7 @@ export const SEED_LIBRARY: Seed[] = [
   { id: "back-hdf", kind: "back", name: "HDF", attrs: { thicknessesMm: [3, 4, 6] } },
   { id: "back-plywood", kind: "back", name: "דיקט", attrs: { thicknessesMm: [4, 6, 8] } },
 
-  { id: "col-white", kind: "color", name: "לבן מט", attrs: { hex: "#f1efea", type: "solid" } },
+  { id: "col-white", kind: "color", name: "לבן מט", attrs: { hex: "#f6f6f3", type: "solid" } },
   { id: "col-cream", kind: "color", name: "שמנת", attrs: { hex: "#e7dcc3", type: "solid" } },
   { id: "col-oak", kind: "color", name: "אלון טבעי", attrs: { hex: "#c8a06c", type: "wood", texture: "oak" } },
   { id: "col-walnut", kind: "color", name: "אגוז", attrs: { hex: "#6a4630", type: "wood", texture: "walnut" } },
