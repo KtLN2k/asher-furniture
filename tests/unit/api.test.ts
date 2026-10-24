@@ -3,7 +3,8 @@ import { beforeAll, describe, expect, it } from "vitest";
 process.env.ASHER_DATA_DIR = "memory://";
 delete process.env.DATABASE_URL;
 
-type Handler = (req: Request, ctx?: { params: Promise<{ id: string }> }) => Promise<Response>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Handler = (req: Request, ctx?: any) => Promise<Response>;
 let projects: { GET: Handler; POST: Handler };
 let project: { GET: Handler; PATCH: Handler; DELETE: Handler };
 let duplicate: { POST: Handler };

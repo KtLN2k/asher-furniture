@@ -55,16 +55,18 @@ export interface WizardStepDef {
   title: string;
   subtitle: string;
   implemented: boolean;
+  /** מה יופיע בשלב כשייבנה (מוצג בשלד המנווט בלבד). */
+  includes?: string[];
 }
 
 export const WIZARD_STEPS: readonly WizardStepDef[] = [
   { n: 1, key: "details", title: "פרטי פרויקט", subtitle: "שם הפרויקט והלקוח", implemented: true },
   { n: 2, key: "type", title: "סוג רהיט", subtitle: "בחרו את סוג הרהיט שברצונכם לתכנן", implemented: true },
-  { n: 3, key: "dimensions", title: "מידות ומבנה", subtitle: "הזינו את המידות ובחרו מיקום", implemented: false },
-  { n: 4, key: "interior", title: "חלוקה פנימית", subtitle: "בחרו את הסידור הפנימי", implemented: false },
-  { n: 5, key: "facades", title: "חזיתות, דלתות וידיות", subtitle: "בחרו סוג דלת, סגנון וידית", implemented: false },
-  { n: 6, key: "materials", title: "חומרים וגימורים", subtitle: "בחרו חומר, צבע וגימור", implemented: false },
-  { n: 7, key: "summary", title: "סיכום ושמירה", subtitle: "צפו בתוצאה, שמרו ושלחו ללקוח", implemented: false },
+  { n: 3, key: "dimensions", title: "מידות ומבנה", subtitle: "הזינו את המידות ובחרו מיקום", implemented: false, includes: ["רוחב, גובה ועומק בס״מ", "מספר דלתות ויחידות", "מיקום: על הרצפה, תלוי או עם רגליים", "בדיקות תקינות והמחשה עם חיצי מידות"] },
+  { n: 4, key: "interior", title: "חלוקה פנימית", subtitle: "בחרו את הסידור הפנימי", implemented: false, includes: ["תבניות מוכנות: תלייה, מדפים, מגירות", "התאמה אישית של כל תא", "כמות מדפים ומגירות"] },
+  { n: 5, key: "facades", title: "חזיתות, דלתות וידיות", subtitle: "בחרו סוג דלת, סגנון וידית", implemented: false, includes: ["סוג דלת: ציר או הזזה", "סגנון חזית וסוג ידית", "הגדרה לכל דלת בנפרד"] },
+  { n: 6, key: "materials", title: "חומרים וגימורים", subtitle: "בחרו חומר, צבע וגימור", implemented: false, includes: ["חומר גוף, חזית וגב", "עובי לוח וגימור", "צבע נפרד לגוף ולחזיתות"] },
+  { n: 7, key: "summary", title: "סיכום ושמירה", subtitle: "צפו בתוצאה, שמרו ושלחו ללקוח", implemented: false, includes: ["סיכום כל ההגדרות", "תצוגת תלת-ממד", "הערות לנגר"] },
 ] as const;
 
 export const TOTAL_STEPS = WIZARD_STEPS.length;
