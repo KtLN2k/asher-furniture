@@ -42,7 +42,7 @@ async function openLocalDb(): Promise<Db> {
     WebAssembly.compileStreaming(fetch(`${base}/pglite.wasm`)),
     fetch(`${base}/pglite.data`).then((r) => r.blob()),
   ]);
-  const client = new PGlite(`idb://${LOCAL_DB_NAME}`, { pgliteWasmModule: wasmModule, fsBundle, relaxedDurability: true });
+  const client = new PGlite(`idb://${LOCAL_DB_NAME}`, { pgliteWasmModule: wasmModule, fsBundle, relaxedDurability: false });
   await client.waitReady;
 
   const wrap = (runner: Runner, inTx: boolean): Db => ({
