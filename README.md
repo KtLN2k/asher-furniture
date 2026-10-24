@@ -72,6 +72,10 @@ npm run build:android:release     # גם APK release חתום (דרוש android/
 # תוצרים: android/app/build/outputs/apk/{debug,release}/
 ```
 
+### חתימת ה-APK (keystore)
+
+קבצי החתימה (`android/*.jks`, `android/keystore.properties`) **אינם נכנסים ל-git**. בארכיון הפרויקט מצורף keystore **זמני** בלבד — `android/asher-temp.jks` עם `keystore.properties` וסיסמה זמנית — כדי שאפשר יהיה לבנות עדכוני APK באותה חתימה בשלב הפיתוח. הוא **אינו מיועד לייצור**: לפני הפצה אמיתית יש ליצור keystore חדש עם סיסמה חזקה (`keytool -genkeypair ...`), לשמור אותו מחוץ לריפו, ולהפנות אליו ב-`keystore.properties`. החלפת ה-keystore פירושה שמשתמשים יצטרכו להסיר את הגרסה הזמנית לפני התקנת גרסת הייצור.
+
 התקנה במכשיר: מעבירים את ה-APK לטלפון (או `adb install -r app-release.apk`), מאשרים "התקנה ממקור לא מוכר", ופותחים "רהיטי אשר".
 
 חיבור לשרת מהטלפון: מריצים את השרת במחשב ברשת המקומית (`npm run build && npm start -- -H 0.0.0.0`), ובאפליקציה מזינים `http://<כתובת-המחשב>:3000`. ה-API מחזיר כותרות CORS פתוחות כברירת מחדל (`CORS_ORIGIN` לשינוי). באמולטור הכתובת של המחשב היא `http://10.0.2.2:3000`.
