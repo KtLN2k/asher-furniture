@@ -6,11 +6,20 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, X } from "lucide-react";
 import { CATEGORY_KEYS, TOTAL_STEPS, WIZARD_STEPS, type CategoryKey } from "@/domain/catalog";
 import { useProjectSession } from "@/lib/use-project-session";
+import { cn } from "../ui/cn";
 import { Button, IconButton, LinkButton } from "../ui/button";
 import { ErrorNotice, LoadingBlock } from "../ui/misc";
 import { SaveIndicator } from "./save-indicator";
 import { Stepper } from "./stepper";
-import { ProjectSummary, StepDetails, StepPlaceholder, StepType, type StepGuard } from "./steps";
+import { ProjectSummary, StepDetails, StepType, type StepGuard } from "./steps";
+import { StepDimensions } from "../planner/step-dimensions";
+import { StepInterior } from "../planner/step-interior";
+import { StepFacades } from "../planner/step-facades";
+import { StepMaterials } from "../planner/step-materials";
+import { StepSummary } from "../planner/step-summary";
+import { usePlanner } from "../planner/use-planner";
+import { useMedia } from "@/lib/use-media";
+import { PreviewPanel } from "./preview-panel";
 
 export function WizardRoot({ routeId }: { routeId: string | null }) {
   return (
@@ -41,6 +50,10 @@ function WizardInner({ routeId }: { routeId: string | null }) {
   const stepFromUrl = Number.isInteger(stepParam) && stepParam >= 1 && stepParam <= TOTAL_STEPS ? stepParam : null;
   const step = routeId === null ? 1 : (stepFromUrl ?? Math.min(project?.wizardStep ?? 1, TOTAL_STEPS));
   const def = WIZARD_STEPS[step - 1];
+
+  const planner = usePlanner(session, project, Boolean(project) && step >= 3);
+  const desktop = useMedia("(min-width: 1024px)");
+  const withPreview = step >= 3 && step <= 6;
 
   const loaded = Boolean(project);
   const savedStep = project?.wizardStep;
@@ -93,6 +106,7 @@ function WizardInner({ routeId }: { routeId: string | null }) {
   if (!project) return <LoadingBlock />;
 
   const lastStep = step === TOTAL_STEPS;
+  const plannerProps = { session, project, planner, guardRef, error: stepError };
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -138,7 +152,7 @@ function WizardInner({ routeId }: { routeId: string | null }) {
         </div>
       )}
 
-      <div className="mx-auto grid w-full max-w-6xl flex-1 content-start gap-6 px-4 py-5 sm:px-6 grid-cols-1 lg:grid-cols-[minmax(0,1fr)_20rem]">
+      <div className={cn("mx-auto grid w-full max-w-6xl flex-1 content-start gap-6 px-4 py-5 sm:px-6 grid-cols-1", step !== 7 && "lg:grid-cols-[minmax(0,1fr)_26rem]")}>
         <section aria-labelledby="step-title" className="min-w-0">
           <h1 id="step-title" className="text-2xl font-extrabold md:text-3xl">
             {def.title}
@@ -151,15 +165,30 @@ function WizardInner({ routeId }: { routeId: string | null }) {
           )}
           {step === 1 && <StepDetails key={session.epoch} session={session} project={project} guardRef={guardRef} error={stepError} />}
           {step === 2 && <StepType key={session.epoch} session={session} project={project} guardRef={guardRef} error={stepError} />}
-          {step > 2 && <StepPlaceholder step={step} project={project} />}
+          {withPreview && !desktop && <PreviewPanel planner={planner} name={project.name} desktop={false} />}
+          {step === 3 && <StepDimensions key={session.epoch} {...plannerProps} />}
+          {step === 4 && <StepInterior key={session.epoch} {...plannerProps} />}
+          {step === 5 && <StepFacades key={session.epoch} {...plannerProps} />}
+          {step === 6 && <StepMaterials key={session.epoch} {...plannerProps} />}
+          {step === 7 && <StepSummary key={session.epoch} {...plannerProps} goTo={(n) => void go(n)} />}
         </section>
 
-        <aside aria-label="סיכום הפרויקט" className="hidden lg:block">
-          <div className="sticky top-40">
-            <h2 className="mb-2 text-lg font-bold">סיכום הפרויקט</h2>
-            <ProjectSummary project={project} />
-          </div>
-        </aside>
+        {step !== 7 && (
+          <aside aria-label={withPreview ? "תצוגה מקדימה בתלת-ממד" : "סיכום הפרויקט"} className="hidden lg:block">
+            <div className="sticky top-40">
+              {withPreview && desktop ? (
+                <PreviewPanel planner={planner} name={project.name} desktop />
+              ) : (
+                !withPreview && (
+                  <>
+                    <h2 className="mb-2 text-lg font-bold">סיכום הפרויקט</h2>
+                    <ProjectSummary project={project} />
+                  </>
+                )
+              )}
+            </div>
+          </aside>
+        )}
       </div>
 
       <div className="sticky bottom-0 z-20 border-t border-sand-200 bg-white/95 pb-[var(--safe-bottom)] backdrop-blur">

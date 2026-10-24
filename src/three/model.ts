@@ -125,7 +125,6 @@ export function buildFurnitureModel(design: FurnitureDesign, opts: ModelOptions)
   const facadeLookBase = surfaceLook(lib, mats.facadeColorId, mats.facadeFinishId);
   const bodyMat = bodyLook.texture ? mat("wood", bodyLook.hex, bodyLook.roughness, { texture: bodyLook.texture }) : mat("matte", bodyLook.hex, bodyLook.roughness);
   const backMat = mat("matte", "#e9e7e1", 0.9);
-  const darkMat = mat("dark", "#161616", 0.8, { metalness: 0 });
   const facadeMatFor = (colorId?: string): MaterialSpec => {
     const look = colorId ? surfaceLook(lib, colorId, mats.facadeFinishId) : facadeLookBase;
     return look.texture ? mat("wood", look.hex, look.roughness, { texture: look.texture }) : mat("matte", look.hex, look.roughness);
@@ -205,7 +204,7 @@ export function buildFurnitureModel(design: FurnitureDesign, opts: ModelOptions)
   // ידיות
   let handles = 0;
   const handleNodes = (look: ResolvedFacade, rect: HandleRect): ModelNode[] => {
-    const nodes = buildHandle(look, rect, nid, darkMat);
+    const nodes = buildHandle(look, rect, nid);
     if (nodes.length) handles++;
     return nodes;
   };
@@ -344,7 +343,7 @@ export interface HandleRect {
 }
 
 /** ידית בקואורדינטות עולם (מ״מ -> מטרים). */
-export function buildHandle(look: ResolvedFacade, r: HandleRect, nid: (k: string) => string, dark: MaterialSpec): ModelNode[] {
+export function buildHandle(look: ResolvedFacade, r: HandleRect, nid: (k: string) => string): ModelNode[] {
   if (look.handle === "none" || look.handle === "push") return [];
   const info = HANDLE_COLOR_INFO[look.handleColor];
   const metal = mat("metal", info.hex, info.rough, { metalness: info.metal });

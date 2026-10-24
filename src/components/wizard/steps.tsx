@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState, type MutableRefObject } from "react";
-import { Check, Hammer } from "lucide-react";
-import { FURNITURE_CATEGORIES, categoryLabel, statusLabel, stepByNumber, type CategoryKey } from "@/domain/catalog";
+import { Check } from "lucide-react";
+import { FURNITURE_CATEGORIES, categoryLabel, statusLabel, type CategoryKey } from "@/domain/catalog";
+import { categoryDefaults } from "@/domain/edit";
 import type { CustomerRef, Project } from "@/domain/project";
 import { ApiError, api } from "@/lib/api";
 import { useDebouncedSaver } from "@/lib/use-saver";
@@ -206,6 +207,11 @@ export function StepType({ session, project, guardRef, error }: StepProps) {
           {error}
         </p>
       )}
+      {project.design.dimensions && (
+        <p className="mb-3 rounded-control bg-info-50 px-4 py-3 text-info-600" data-testid="type-change-note">
+          החלפת סוג הרהיט מאפסת את המידות, החלוקה הפנימית והחזיתות לברירות המחדל של הסוג החדש. החומרים והצבעים נשמרים.
+        </p>
+      )}
       <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4" role="radiogroup" aria-label="סוג רהיט">
         {FURNITURE_CATEGORIES.map((c) => {
           const selected = project.category === c.key;
@@ -216,7 +222,11 @@ export function StepType({ session, project, guardRef, error }: StepProps) {
                 role="radio"
                 aria-checked={selected}
                 data-testid={`category-${c.key}`}
-                onClick={() => session.update({ design: { category: c.key as CategoryKey } })}
+                onClick={() => {
+                  if (selected) return;
+                  const key = c.key as CategoryKey;
+                  session.update({ design: project.design.dimensions ? { category: key, ...categoryDefaults(key, null) } : { category: key } });
+                }}
                 className={cn(
                   "relative block w-full overflow-hidden rounded-card border-2 bg-white text-center shadow-card transition active:scale-[0.98]",
                   selected ? "border-wood-600 ring-4 ring-wood-100" : "border-sand-200 hover:border-wood-400",
@@ -235,33 +245,6 @@ export function StepType({ session, project, guardRef, error }: StepProps) {
           );
         })}
       </ul>
-    </div>
-  );
-}
-
-export function StepPlaceholder({ step, project }: { step: number; project: Project }) {
-  const def = stepByNumber(step)!;
-  const isSummary = def.key === "summary";
-  return (
-    <div className="flex flex-col gap-4">
-      {isSummary && <ProjectSummary project={project} />}
-      <Card className="flex flex-col items-start gap-3 p-5" data-testid="step-placeholder">
-        <div className="flex items-center gap-3 text-wood-600">
-          <Hammer className="size-7" aria-hidden />
-          <h2 className="text-xl font-bold text-ink-900">השלב הזה ייבנה בשלב הפיתוח הבא</h2>
-        </div>
-        <p className="text-ink-600">
-          כאן יופיעו בקרוב:
-        </p>
-        <ul className="list-disc space-y-1 ps-6 text-ink-700">
-          {def.includes?.map((t) => (
-            <li key={t}>{t}</li>
-          ))}
-        </ul>
-        <p className="rounded-control bg-cream-100 px-4 py-3 text-sm text-ink-600">
-          ההתקדמות שלכם נשמרת. אפשר לצאת עכשיו ולחזור בכל רגע בדיוק לשלב הזה דרך ״הפרויקטים שלי״.
-        </p>
-      </Card>
     </div>
   );
 }
