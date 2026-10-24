@@ -9,6 +9,7 @@ import type { Library } from "@/domain/materials";
 import { DEFAULT_ROOM, ROOM_KEYS, ROOM_LABELS, type RoomKey } from "@/domain/rooms";
 import { Button } from "../ui/button";
 import { cn } from "../ui/cn";
+import { saveImage } from "@/lib/save-image";
 import { Dialog } from "../ui/dialog";
 import { buildFurnitureModel } from "@/three/model";
 import {
@@ -195,25 +196,17 @@ export default function FurnitureViewer({ design, library, name, compact, classN
     }
   };
 
+  const fileName = () => `${(name || "רהיט").trim().replace(/[\\/:*?"<>|]+/g, "-")}-הדמיה.png`;
+
   const downloadRender = () => {
-    if (!result.url) return;
-    const a = document.createElement("a");
-    a.href = result.url;
-    a.download = `${(name || "רהיט").trim().replace(/[\\/:*?"<>|]+/g, "-")}-הדמיה.png`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    if (!result.blob) return;
+    void saveImage(result.blob, fileName(), name || "הדמיה");
   };
 
   const capture = () => {
     const url = handle.current?.capture();
     if (!url) return;
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${(name || "רהיט").trim().replace(/[\\/:*?"<>|]+/g, "-")}-הדמיה.png`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    void saveImage(url, fileName(), name || "הדמיה");
   };
 
   useEffect(() => {
@@ -335,7 +328,7 @@ export default function FurnitureViewer({ design, library, name, compact, classN
               <span className="text-ink-500">{roomOn ? ROOM_LABELS[room] : "ללא"}</span>
             </button>
             {roomMenu && (
-              <div role="menu" aria-label="חדר לדוגמה" data-testid="room-menu" className="absolute bottom-full start-0 z-10 mb-2 w-48 rounded-control border border-sand-300 bg-white p-1 shadow-lift">
+              <div role="menu" aria-label="חדר לדוגמה" data-testid="room-menu" className="absolute bottom-full start-0 z-10 mb-2 grid w-72 max-w-[calc(100vw-2rem)] grid-cols-2 gap-x-1 rounded-control border border-sand-300 bg-white p-1 shadow-lift">
                 {ROOM_KEYS.map((k) => (
                   <button key={k} type="button" role="menuitemradio" aria-checked={roomOn && room === k} data-testid={`room-${k}`} onClick={() => chooseRoom(k)} className={cn("flex min-h-11 w-full items-center justify-between rounded-lg px-3 text-start text-base hover:bg-cream-100", roomOn && room === k && "font-bold text-wood-600")}>
                     {ROOM_LABELS[k]}

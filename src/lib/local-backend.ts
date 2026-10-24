@@ -52,7 +52,11 @@ async function openLocalDb(): Promise<Db> {
     },
     async transaction<T>(fn: (tx: Db) => Promise<T>) {
       if (inTx) return fn(wrap(runner, true));
-      return client.transaction((tx) => fn(wrap(tx as Runner, true)));
+      const result = await client.transaction((tx) => fn(wrap(tx as Runner, true)));
+      // PGlite 0.5 אינו מסנכרן ל-IndexedDB אחרי transaction() (בניגוד לשאילתה רגילה);
+      // בלי זה הכתיבה אובדת ברענון/סגירה של האפליקציה.
+      await client.syncToFs();
+      return result;
     },
     async close() {
       if (!inTx) await client.close();

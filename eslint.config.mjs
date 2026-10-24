@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Android (Capacitor): עותקי ייצוא ותוצרי build, לא קוד מקור
+    "android/**",
+    "public/pglite/**",
   ]),
 ]);
 

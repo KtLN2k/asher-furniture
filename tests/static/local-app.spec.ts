@@ -54,6 +54,41 @@ test("פרויקט נשמר במכשיר, שורד טעינה מחדש ונפת�
   await expect(page.getByTestId("door-count-input")).toHaveValue("7");
 });
 
+test("בחירת חדר ו״צור הדמיה״ עובדים במצב מקומי: החדר נשמר במכשיר והתמונה הממוזערת מופיעה בכרטיס", async ({ page }) => {
+  const name = `ארון הדמיה ${Date.now().toString(36)}`;
+  await page.goto("/projects/new/");
+  await page.getByLabel("שם הפרויקט").fill(name);
+  await saved(page);
+  await page.getByRole("button", { name: "המשך" }).click();
+  await page.getByTestId("category-wardrobes").click();
+  await saved(page);
+  await page.getByRole("button", { name: "המשך" }).click();
+  await expect(page.getByTestId("viewer")).toHaveAttribute("data-ready", "true", { timeout: 90_000 });
+  await expect(page.getByTestId("viewer")).toHaveAttribute("data-room", "bedroom");
+
+  await page.getByTestId("viewer-room").click();
+  await page.getByTestId("room-living").click();
+  await expect(page.getByTestId("viewer")).toHaveAttribute("data-room", "living");
+  await expect.poll(async () => page.evaluate(() => window.__asherScene?.stats()?.room ?? null)).toBe("living");
+  await saved(page);
+
+  await page.getByTestId("viewer-render").click();
+  await expect(page.getByTestId("render-result")).toBeVisible({ timeout: 150_000 });
+  await expect(page.getByTestId("render-saved")).toBeVisible();
+  const download = page.waitForEvent("download");
+  await page.getByTestId("render-download").click();
+  expect((await download).suggestedFilename()).toMatch(/הדמיה\.png$/);
+  await page.locator("dialog button", { hasText: "סגירה" }).first().click();
+  await saved(page);
+
+  // טעינה מלאה: החדר והתמונה הממוזערת נשמרו ב-IndexedDB
+  await page.reload();
+  await expect(page.getByTestId("viewer")).toHaveAttribute("data-room", "living", { timeout: 90_000 });
+  await page.goto("/projects/");
+  const thumb = page.getByTestId("project-card").filter({ hasText: name }).getByTestId("project-thumbnail");
+  await expect(thumb).toHaveAttribute("src", /^data:image\/jpeg;base64,/);
+});
+
 test("הגדרות: ספריית חומרים מקומית ולשונית מכשיר וחיבור", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("link", { name: "הגדרות" }).first().click();
