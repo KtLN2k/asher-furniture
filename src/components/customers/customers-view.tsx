@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { MapPin, Phone, Plus, Search, Users } from "lucide-react";
 import { api } from "@/lib/api";
+import { routes } from "@/lib/routes";
 import { useAsync, useDebounced } from "@/lib/use-async";
 import { PageContainer, PageHeader } from "../shell/page";
 import { Button } from "../ui/button";
@@ -62,7 +63,7 @@ export function CustomersView() {
           {list.data.map((c) => (
             <li key={c.id}>
               <Link
-                href={`/customers/${c.id}`}
+                href={routes.customer(c.id)}
                 data-testid="customer-card"
                 className="flex min-h-20 items-center justify-between gap-3 rounded-card border border-sand-200 bg-white p-4 shadow-card transition hover:border-wood-400"
               >
@@ -103,7 +104,7 @@ export function CustomersView() {
               const c = await api.createCustomer(v);
               toast("הלקוח נוסף");
               setAdding(false);
-              router.push(`/customers/${c.id}`);
+              router.push(routes.customer(c.id));
             } catch (e) {
               setError((e as Error).message);
             } finally {

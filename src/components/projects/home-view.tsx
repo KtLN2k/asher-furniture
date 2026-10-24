@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowLeft, Plus } from "lucide-react";
 import { FURNITURE_CATEGORIES } from "@/domain/catalog";
 import { api } from "@/lib/api";
+import { routes } from "@/lib/routes";
 import { useAsync } from "@/lib/use-async";
 import { CategoryArt } from "../illustrations/category-art";
 import { PageContainer } from "../shell/page";
@@ -34,7 +35,7 @@ export function HomeView() {
             המשך עבודה
           </h2>
           <LinkButton
-            href={`/projects/${latest.id}`}
+            href={routes.project(latest.id)}
             variant="secondary"
             size="lg"
             className="w-full justify-between border-wood-400 bg-wood-50 text-wood-700"

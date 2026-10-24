@@ -6,6 +6,7 @@ import { Archive, ArchiveRestore, Copy, FolderOpen, Pencil, Plus, Search, Tag, T
 import { PROJECT_STATUSES, type ProjectStatus } from "@/domain/catalog";
 import type { ProjectSummary } from "@/domain/project";
 import { api } from "@/lib/api";
+import { routes } from "@/lib/routes";
 import { useAsync, useDebounced } from "@/lib/use-async";
 import { PageContainer, PageHeader } from "../shell/page";
 import { Button, LinkButton } from "../ui/button";
@@ -123,7 +124,7 @@ export function ProjectsView() {
                 <ActionMenu
                   label={`פעולות עבור ${p.name}`}
                   items={[
-                    { label: "פתיחה והמשך עבודה", icon: <FolderOpen className="size-5" />, onSelect: () => router.push(`/projects/${p.id}`) },
+                    { label: "פתיחה והמשך עבודה", icon: <FolderOpen className="size-5" />, onSelect: () => router.push(routes.project(p.id)) },
                     { label: "שינוי שם", icon: <Pencil className="size-5" />, onSelect: () => setRenaming(p) },
                     { label: "שינוי סטטוס", icon: <Tag className="size-5" />, onSelect: () => setStatusFor(p) },
                     { label: "שכפול", icon: <Copy className="size-5" />, onSelect: () => run(() => api.duplicateProject(p.id), "הפרויקט שוכפל") },

@@ -12,6 +12,7 @@ import type {
   ProjectSummary,
   ShopSettings,
 } from "@/domain/project";
+import { getServerBase, usesLocalStore } from "./app-env";
 
 export class ApiError extends Error {
   constructor(
@@ -28,9 +29,10 @@ export class ApiError extends Error {
 }
 
 async function request<T>(method: string, url: string, body?: unknown, opts?: { signal?: AbortSignal; keepalive?: boolean }): Promise<T> {
+  if (usesLocalStore()) return requestLocal<T>(method, url, body);
   let res: Response;
   try {
-    res = await fetch(url, {
+    res = await fetch(getServerBase() + url, {
       method,
       headers: body === undefined ? undefined : { "Content-Type": "application/json" },
       body: body === undefined ? undefined : JSON.stringify(body),
@@ -48,6 +50,17 @@ async function request<T>(method: string, url: string, body?: unknown, opts?: { 
     throw new ApiError(e?.message ?? "אירעה תקלה. נסו שוב.", res.status, e?.code ?? "server", e?.current);
   }
   return data as T;
+}
+
+/** אפליקציה ארוזה ללא שרת: אותן קריאות, מול האחסון המקומי במכשיר (נטען דינמית). */
+async function requestLocal<T>(method: string, url: string, body?: unknown): Promise<T> {
+  const local = await import("./local-backend");
+  try {
+    return await local.dispatch<T>(method, url, body);
+  } catch (err) {
+    if (err instanceof local.LocalHttpError) throw new ApiError(err.message, err.status, err.code, err.current as Project | undefined);
+    throw new ApiError("האחסון המקומי לא נפתח. נסו לסגור ולפתוח את האפליקציה.", 0, "storage");
+  }
 }
 
 function qs(params: Record<string, string | number | undefined>) {

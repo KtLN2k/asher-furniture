@@ -45,3 +45,8 @@ next-env.d.ts
 /.data-e2e/
 /test-results/
 /playwright-report/
+
+# android / static app build
+/out/
+/.android-build/
+/public/pglite/

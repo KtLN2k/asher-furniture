@@ -1,9 +1,18 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { Suspense } from "react";
 import { WizardRoot } from "@/components/wizard/wizard-root";
+import { useRouteId } from "@/lib/routes";
 
 export default function WizardPage() {
-  const { id } = useParams<{ id: string }>();
+  return (
+    <Suspense>
+      <WizardPageInner />
+    </Suspense>
+  );
+}
+
+function WizardPageInner() {
+  const id = useRouteId();
   return <WizardRoot key={id} routeId={id} />;
 }

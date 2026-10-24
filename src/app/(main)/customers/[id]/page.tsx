@@ -1,9 +1,18 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { Suspense } from "react";
 import { CustomerDetail } from "@/components/customers/customer-detail";
+import { useRouteId } from "@/lib/routes";
 
 export default function CustomerPage() {
-  const { id } = useParams<{ id: string }>();
+  return (
+    <Suspense>
+      <CustomerPageInner />
+    </Suspense>
+  );
+}
+
+function CustomerPageInner() {
+  const id = useRouteId();
   return <CustomerDetail id={id} />;
 }

@@ -9,6 +9,8 @@ import { Button } from "./ui/button";
 import { cn } from "./ui/cn";
 import { LibraryEditor } from "./settings/library-editor";
 import { LimitsEditor } from "./settings/limits-editor";
+import { DeviceSettings } from "./settings/device-settings";
+import { IS_STATIC_APP } from "@/lib/app-env";
 import { Field, TextInput } from "./ui/field";
 import { Card, ErrorNotice, LoadingBlock } from "./ui/misc";
 import { useToast } from "./ui/toast";
@@ -17,6 +19,8 @@ const TABS = [
   { key: "shop", label: "פרטי העסק" },
   { key: "library", label: "ספריית חומרים" },
   { key: "limits", label: "מגבלות מידות" },
+  // באפליקציה הארוזה בלבד: אחסון במכשיר וחיבור לשרת
+  ...(IS_STATIC_APP ? [{ key: "device", label: "מכשיר וחיבור" }] : []),
 ] as const;
 
 export function SettingsView() {
@@ -52,6 +56,7 @@ export function SettingsView() {
       )}
       {tab === "library" && <LibraryEditor />}
       {tab === "limits" && <LimitsEditor />}
+      {tab === "device" && <DeviceSettings />}
     </PageContainer>
   );
 }

@@ -19,6 +19,7 @@ import { StepMaterials } from "../planner/step-materials";
 import { StepSummary } from "../planner/step-summary";
 import { usePlanner } from "../planner/use-planner";
 import { useMedia } from "@/lib/use-media";
+import { routes } from "@/lib/routes";
 import { PreviewPanel } from "./preview-panel";
 
 export function WizardRoot({ routeId }: { routeId: string | null }) {
@@ -37,7 +38,7 @@ function WizardInner({ routeId }: { routeId: string | null }) {
 
   const session = useProjectSession(routeId, {
     initialCategory,
-    onCreated: (p) => window.history.replaceState(null, "", `/projects/${p.id}/wizard?step=1`),
+    onCreated: (p) => window.history.replaceState(null, "", routes.wizard(p.id, 1)),
   });
   const { project } = session;
 
@@ -79,7 +80,7 @@ function WizardInner({ routeId }: { routeId: string | null }) {
     const ok = await session.flush();
     const id = session.getId();
     if (!ok || !id) return;
-    router.push(`/projects/${id}/wizard?step=${target}`);
+    router.push(routes.wizard(id, target));
   }
 
   async function leave(to: string) {

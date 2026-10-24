@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import "@fontsource-variable/heebo";
 import "./globals.css";
 import { ToastProvider } from "@/components/ui/toast";
+import { StaticAppBoot } from "@/components/shell/static-app-boot";
+import { IS_STATIC_APP } from "@/lib/app-env";
 
 export const metadata: Metadata = {
   title: { default: "רהיטי אשר", template: "%s | רהיטי אשר" },
@@ -20,6 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="he" dir="rtl" className="h-full antialiased">
       <body className="min-h-full">
+        {IS_STATIC_APP && <StaticAppBoot />}
         <ToastProvider>{children}</ToastProvider>
       </body>
     </html>

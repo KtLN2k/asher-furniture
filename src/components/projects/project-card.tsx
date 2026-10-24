@@ -4,6 +4,7 @@ import { Archive, Clock, User } from "lucide-react";
 import { categoryLabel, TOTAL_STEPS } from "@/domain/catalog";
 import type { ProjectSummary } from "@/domain/project";
 import { formatDate } from "@/lib/format";
+import { routes } from "@/lib/routes";
 import { CategoryArt, PlaceholderArt } from "../illustrations/category-art";
 import { StatusBadge } from "../ui/status-badge";
 
@@ -30,7 +31,7 @@ export function ProjectCard({ project, menu }: { project: ProjectSummary; menu?:
         <div className="min-w-0">
           <h3 className="line-clamp-2 break-words text-lg font-bold leading-snug [overflow-wrap:anywhere]">
             <Link
-              href={`/projects/${project.id}`}
+              href={routes.project(project.id)}
               className="after:absolute after:inset-0 after:content-[''] focus-visible:after:rounded-card"
             >
               {project.name}

@@ -1,4 +1,3 @@
-import { randomUUID } from "node:crypto";
 import type { Db } from "../db/types";
 import { emptyDesign, mergeDesign, type FurnitureDesign } from "@/domain/design";
 import type { CategoryKey, ProjectStatus } from "@/domain/catalog";
@@ -138,8 +137,8 @@ export class SqlRepository implements Repository {
   }
 
   async createProject(input: ProjectCreateInput): Promise<Project> {
-    const id = randomUUID();
-    const furnitureId = randomUUID();
+    const id = crypto.randomUUID();
+    const furnitureId = crypto.randomUUID();
     return this.db.transaction(async (tx) => {
       if (input.customerId) await this.assertCustomer(tx, input.customerId);
       await tx.query(
@@ -208,7 +207,7 @@ export class SqlRepository implements Repository {
     return this.db.transaction(async (tx) => {
       const src = await this.loadProject(tx, id);
       if (!src) throw new NotFoundError("הפרויקט");
-      const newId = randomUUID();
+      const newId = crypto.randomUUID();
       await tx.query(
         `INSERT INTO projects (id, name, customer_id, status, notes, thumbnail, wizard_step)
          SELECT $2, left(name, 100) || ' — עותק', customer_id, 'draft', notes, thumbnail, wizard_step
@@ -220,7 +219,7 @@ export class SqlRepository implements Repository {
         [id],
       );
       for (const item of items) {
-        const newItemId = randomUUID();
+        const newItemId = crypto.randomUUID();
         await tx.query(
           `INSERT INTO furniture_items (id, project_id, position, category, spec) VALUES ($1,$2,$3,$4,$5::jsonb)`,
           [newItemId, newId, item.position, item.category, JSON.stringify(item.spec)],
@@ -232,7 +231,7 @@ export class SqlRepository implements Repository {
         for (const f of facades) {
           await tx.query(
             `INSERT INTO facades (id, furniture_id, position, target, material_id, spec) VALUES ($1,$2,$3,$4,$5,$6::jsonb)`,
-            [randomUUID(), newItemId, f.position, f.target, f.material_id, JSON.stringify(f.spec)],
+            [crypto.randomUUID(), newItemId, f.position, f.target, f.material_id, JSON.stringify(f.spec)],
           );
         }
         const parts = await tx.query<Row>(
@@ -243,7 +242,7 @@ export class SqlRepository implements Repository {
           await tx.query(
             `INSERT INTO parts (id, furniture_id, kind, label, material_id, cut_dimensions, spec) VALUES ($1,$2,$3,$4,$5,$6::jsonb,$7::jsonb)`,
             [
-              randomUUID(),
+              crypto.randomUUID(),
               newItemId,
               p.kind,
               p.label,
@@ -284,7 +283,7 @@ export class SqlRepository implements Repository {
   }
 
   async createCustomer(input: CustomerInput): Promise<Customer> {
-    const id = randomUUID();
+    const id = crypto.randomUUID();
     const rows = await this.db.query<Row>(
       `INSERT INTO customers (id, name, phone, address, notes) VALUES ($1,$2,$3,$4,$5) RETURNING *`,
       [id, input.name, input.phone, input.address, input.notes],
@@ -336,7 +335,7 @@ export class SqlRepository implements Repository {
   }
 
   async createMaterial(input: MaterialCreateInput): Promise<LibraryItem> {
-    const id = input.id ?? `${input.kind}-${randomUUID().slice(0, 8)}`;
+    const id = input.id ?? `${input.kind}-${crypto.randomUUID().slice(0, 8)}`;
     if ((await this.db.query(`SELECT 1 FROM materials WHERE id = $1`, [id])).length) {
       throw new ValidationError("כבר קיים פריט עם המזהה הזה");
     }

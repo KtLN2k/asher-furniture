@@ -1,5 +1,8 @@
 import type { MetadataRoute } from "next";
 
+// נדרש לייצוא הסטטי של האפליקציה (output: export); באתר המניפסט ממילא קבוע
+export const dynamic = "force-static";
+
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "רהיטי אשר",

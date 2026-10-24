@@ -21,7 +21,8 @@ const NAV = [
  *  - מחשב (1024+): סרגל צד רחב עם לוגו ותוויות.
  */
 export function AppShell({ children, focusOnMobile = false }: { children: ReactNode; focusOnMobile?: boolean }) {
-  const pathname = usePathname();
+  // בלי לוכסן סופי: בייצוא הסטטי (APK) הנתיבים מסתיימים ב-/
+  const pathname = usePathname().replace(/(.)\/$/, "$1");
   const newActive = pathname === "/projects/new";
 
   return (
