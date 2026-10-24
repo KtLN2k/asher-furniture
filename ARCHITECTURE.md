@@ -120,9 +120,18 @@ FurnitureDesign (JSON שנשמר)          src/domain/design.ts
 - **ביצועים**: `frameloop="demand"` (מצייר רק כשיש שינוי), גיאומטריה ממוטמנת, בניית מודל על ערך דחוי (`useDeferredValue`) כדי שההקלדה לא תיתקע.
 - **איכות אוטומטית** (`quality.ts`): שלוש רמות (גבוהה/בינונית/נמוכה). בחירה התחלתית לפי המכשיר: אנדרואיד עם ≤4 ליבות או ≤3GB זיכרון, או רינדור תוכנתי ← נמוכה. בזמן ריצה `FrameGovernor` מודד קצב פריימים (מתעלם מהפסקות של מצב לפי-דרישה) ומוריד רמה כשהמכשיר מתקשה. אפשר לבחור ידנית בכפתור "איכות" (נשמר ב-`localStorage`) או `?quality=`. ברמה נמוכה: בלי צללים, טקסטורות קטנות, בלי מפות בליטה, בלי צללי מגע.
 
-### מוכנות לאריזה כ-APK (תשתית בלבד, לא ממומש)
-הלקוח הוא אפליקציית דפדפן שמדברת עם API בלבד, ולכן אפשר לארוז אותו בלי לשכתב:
-- **Capacitor** (מומלץ): `next build` עם `output: "export"` ללקוח סטטי (כל הדפים הם מעטפות; הנתונים מה-API), ו-WebView שמריץ אותו. דרוש: (1) משתנה `NEXT_PUBLIC_API_BASE` כך שה-`fetch` יפנה לשרת מרוחק במקום origin יחסי (כיום הנתיבים יחסיים ב-`src/lib/api.ts`), (2) הרשאת CORS ב-API לאפליקציה, (3) טיפול ב-`/projects/[id]` דינמי במצב סטטי (הפניה בצד לקוח או `generateStaticParams` עם מזהה אחד), (4) אימות משתמשים לפני חשיפת ה-API לאינטרנט, (5) חתימת APK/AAB והעלאה ל-Play.
-- **TWA** (חלופה קלה): ה-manifest כבר קיים; נדרשים Service Worker, HTTPS ו-Digital Asset Links.
-- **לא מקוון**: כיום אין Service Worker. אם רוצים עבודה בלי רשת צריך לשמור פרויקטים מקומית (IndexedDB) ולסנכרן; השמירה האוטומטית כבר בנויה כ"שליחה עם ניסיון חוזר", כך שהתוספת היא שכבת אחסון מקומי.
-- **ביצועים באנדרואיד**: הורדת האיכות האוטומטית כבר קיימת; יש לבדוק על מכשיר פיזי (הבדיקות כאן רצות על WebGL תוכנתי). כדאי לדחות את טעינת `three` (נטען עצלנית ב-`LazyViewer`).
+### אפליקציית אנדרואיד (APK): Capacitor עם לקוח סטטי
+הלקוח הוא אפליקציית דפדפן שמדברת עם API בלבד, ולכן הוא נארז בלי שכתוב. נבחר **Capacitor** ולא TWA: TWA דורש אתר ב-HTTPS ציבורי עם Service Worker ו-Digital Asset Links, כלומר לא עובד בלי שרת ובלי אינטרנט; Capacitor אורז את הקבצים בתוך ה-APK, רץ ב-WebView של המכשיר (Chrome) עם WebGL ו-WASM, ופותח דרך להרחבות מקומיות (שיתוף קבצים, מצלמה) בהמשך.
+
+**בנייה** (`scripts/build-android.mjs`, `npm run build:android`):
+1. `NEXT_PUBLIC_STATIC_APP=1 next build` עם `output: "export"` ו-`trailingSlash` ל-`out/`. ל-Route Handlers אין מקום בייצוא סטטי, ולכן `src/app/api` מועבר הצידה למשך הבנייה ומוחזר תמיד (גם בכישלון).
+2. קבצי PGlite (`pglite.wasm`, `pglite.data`, ‏~16MB) מועתקים ל-`public/pglite/` (ב-.gitignore).
+3. `cap sync android` מעתיק את `out/` לתוך `android/app/src/main/assets/public` (לא ב-git), ו-Gradle בונה `app-debug.apk`; עם `--release` גם `app-release.apk` חתום לפי `android/keystore.properties`.
+
+**נתיבים דינמיים בייצוא סטטי** (`src/lib/routes.ts`): `/projects/[id]/wizard` ו-`/customers/[id]` נבנים פעם אחת עם מציין המקום `_` (`generateStaticParams` ב-`layout.tsx` של הסגמנט, פעיל רק במצב סטטי), והמזהה עובר בשאילתה: `/projects/_/wizard/?id=<uuid>&step=3`. כל הקישורים נבנים דרך `routes.project/wizard/customer`, והדפים קוראים `useRouteId()`. באתר הרגיל הכתובות נשארות `/projects/<uuid>/wizard?step=3`. שרת הקבצים של Capacitor מגיש את `index.html` של השורש לכל נתיב בלי סיומת, ולכן `StaticAppBoot` (ב-root layout, רק במצב סטטי) מנווט בצד הלקוח לכתובת האמיתית אחרי טעינה מלאה.
+
+**איפה הנתונים** (`src/lib/app-env.ts`, `src/lib/api.ts`): אותו אובייקט `api` משרת את כל המסכים. במצב סטטי בלי כתובת שרת, `request()` מפנה ל-`src/lib/local-backend.ts`: **אותו `SqlRepository` ואותן מיגרציות שרצים בשרת, על PGlite ב-WASM בתוך ה-WebView, עם אחסון ב-IndexedDB** (`idb://asher-furniture`). `dispatch()` משקף את נתיבי ה-API אחד לאחד (אותם סכמות zod, אותם קודי שגיאה), כך שהמסכים לא יודעים אם הם מול שרת או מול המכשיר. ברירת המחדל באפליקציה היא עבודה מקומית: אפשר להתקין, לפתוח ולתכנן בלי שרת ובלי אינטרנט.
+
+**חיבור לשרת**: במסך הגדרות ← "מכשיר וחיבור" מגדירים כתובת שרת (נשמרת ב-`localStorage` תחת `asher:server`; אפשר גם לקבע בזמן הבנייה עם `NEXT_PUBLIC_API_BASE`). אחרי שמירה האפליקציה עובדת מול השרת (`fetch` ל-`<base>/api/...`). "העלאה לשרת" (`src/lib/sync.ts`) מעתיקה חד-פעמית לקוחות ופרויקטים מהמכשיר לשרת (זוכרת מה הועלה, לא מעלה פעמיים). זה לא סנכרון דו-כיווני רציף: אחרי המעבר עובדים מול השרת. השרת מוסיף כותרות CORS ל-`/api/*` (`next.config.ts`, ברירת מחדל `*` כי אין עוגיות/אימות; `CORS_ORIGIN` לשינוי או `off`).
+
+**מה עוד יידרש לייצור**: אימות משתמשים לפני חשיפת ה-API לאינטרנט (ואז CORS מצומצם ל-origin של האפליקציה `https://localhost`), keystore קבוע במקום הזמני, העלאה ל-Play כ-AAB (`bundleRelease`), ובדיקה על מכשיר Galaxy פיזי (כאן נבדק באמולטור בלבד).

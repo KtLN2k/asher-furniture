@@ -59,6 +59,30 @@ node scripts/capture-phase-b.mjs http://localhost:3300 docs/screenshots-b
 
 ברירת המחדל אוטומטית לפי המכשיר ויורדת בזמן ריצה אם הקצב נמוך. אפשר לכפות רמה בכפתור "איכות" בתצוגה, או ב-`?quality=low|medium|high`.
 
+## אפליקציית אנדרואיד (APK)
+
+הלקוח נארז עם [Capacitor](https://capacitorjs.com) כאפליקציית אנדרואיד שעובדת **גם בלי שרת**: הנתונים נשמרים במכשיר (PostgreSQL מוטמע, PGlite ב-IndexedDB) דרך אותה שכבת Repository של השרת. אם מגדירים כתובת שרת בהגדרות ← "מכשיר וחיבור", האפליקציה עוברת לעבוד מולו ואפשר להעלות אליו את מה שנשמר במכשיר. פרטים: [ARCHITECTURE.md](./ARCHITECTURE.md#אפליקציית-אנדרואיד-apk-capacitor-עם-לקוח-סטטי).
+
+דרישות לבנייה: JDK 21, Android SDK (platform 36, build-tools 36) עם `ANDROID_HOME`.
+
+```bash
+npm run android:assets            # אייקונים ומסך פתיחה מ-public/icons/logo.svg (כבר בוצע; רק אחרי שינוי לוגו)
+npm run build:android             # ייצוא סטטי -> out/, cap sync, APK debug
+npm run build:android:release     # גם APK release חתום (דרוש android/keystore.properties, ראו keystore.properties.example)
+# תוצרים: android/app/build/outputs/apk/{debug,release}/
+```
+
+התקנה במכשיר: מעבירים את ה-APK לטלפון (או `adb install -r app-release.apk`), מאשרים "התקנה ממקור לא מוכר", ופותחים "רהיטי אשר".
+
+חיבור לשרת מהטלפון: מריצים את השרת במחשב ברשת המקומית (`npm run build && npm start -- -H 0.0.0.0`), ובאפליקציה מזינים `http://<כתובת-המחשב>:3000`. ה-API מחזיר כותרות CORS פתוחות כברירת מחדל (`CORS_ORIGIN` לשינוי). באמולטור הכתובת של המחשב היא `http://10.0.2.2:3000`.
+
+בדיקות הלקוח הסטטי (בלי שרת, מול שרת קבצים שמדמה את Capacitor):
+
+```bash
+node scripts/build-android.mjs --web-only
+npx playwright test -c playwright.static.config.ts
+```
+
 ## מבנה
 
 ```
@@ -67,6 +91,7 @@ src/three       מודל תלת-ממד פרמטרי, חומרים וטקסטור
 src/server      API helpers, repository, בסיס נתונים ומיגרציות
 src/app         דפים ו-Route Handlers (api/)
 src/components  ui (Design System), shell (ניווט), projects, customers, wizard, planner (שלבי התכנון), viewer (תלת-ממד), settings (ספריית חומרים ומגבלות)
-src/lib         api client, שמירה אוטומטית, עזרים
-tests           unit (Vitest) ו-e2e (Playwright)
+src/lib         api client (שרת או אחסון מקומי במכשיר), שמירה אוטומטית, ניתוב סטטי, עזרים
+android         פרויקט Capacitor/Gradle של האפליקציה (הקבצים הסטטיים מועתקים אליו בבנייה)
+tests           unit (Vitest), e2e (Playwright) ו-static (האפליקציה הארוזה)
 ```
