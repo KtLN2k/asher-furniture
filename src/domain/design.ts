@@ -62,15 +62,25 @@ export const materialsSelectionSchema = z.object({
   facadeColorId: z.string().optional(),
 });
 
+const designSections = {
+  category: z.enum(CATEGORY_KEYS).nullable(),
+  dimensions: dimensionsSchema,
+  structure: structureSchema,
+  interior: interiorSchema,
+  facades: facadesSchema,
+  materials: materialsSelectionSchema,
+  notes: z.string().max(4000),
+};
+
 export const designSchema = z.object({
-  schemaVersion: z.literal(1).default(1),
-  category: z.enum(CATEGORY_KEYS).nullable().default(null),
-  dimensions: dimensionsSchema.optional(),
-  structure: structureSchema.optional(),
-  interior: interiorSchema.optional(),
-  facades: facadesSchema.optional(),
-  materials: materialsSelectionSchema.optional(),
-  notes: z.string().max(4000).optional(),
+  schemaVersion: z.literal(1),
+  category: designSections.category,
+  dimensions: designSections.dimensions.optional(),
+  structure: designSections.structure.optional(),
+  interior: designSections.interior.optional(),
+  facades: designSections.facades.optional(),
+  materials: designSections.materials.optional(),
+  notes: designSections.notes.optional(),
 });
 
 export type FurnitureDesign = z.infer<typeof designSchema>;
@@ -85,7 +95,16 @@ export const DESIGN_SECTIONS = [
   "notes",
 ] as const;
 
-export const designPatchSchema = designSchema.omit({ schemaVersion: true }).partial();
+/** עדכון חלקי: רק סעיפים שנשלחו. בלי ברירות מחדל, כדי שסעיף חסר לעולם לא ידרוס נתונים. */
+export const designPatchSchema = z.object({
+  category: designSections.category.optional(),
+  dimensions: designSections.dimensions.optional(),
+  structure: designSections.structure.optional(),
+  interior: designSections.interior.optional(),
+  facades: designSections.facades.optional(),
+  materials: designSections.materials.optional(),
+  notes: designSections.notes.optional(),
+});
 export type DesignPatch = z.infer<typeof designPatchSchema>;
 
 export function emptyDesign(): FurnitureDesign {

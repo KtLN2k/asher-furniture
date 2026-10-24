@@ -53,7 +53,12 @@ export const customerInputSchema = z.object({
 });
 export type CustomerInput = z.infer<typeof customerInputSchema>;
 
-export const customerPatchSchema = customerInputSchema.partial();
+export const customerPatchSchema = z.object({
+  name: trimmed(120).min(1, "יש להזין שם לקוח").optional(),
+  phone: trimmed(40).optional(),
+  address: trimmed(200).optional(),
+  notes: trimmed(2000).optional(),
+});
 export type CustomerPatch = z.infer<typeof customerPatchSchema>;
 
 export const projectCreateSchema = z.object({
@@ -76,11 +81,17 @@ export const projectPatchSchema = z.object({
 export type ProjectPatch = z.infer<typeof projectPatchSchema>;
 
 export const settingsSchema = z.object({
-  businessName: trimmed(120).default("רהיטי אשר"),
+  businessName: trimmed(120).min(1, "יש להזין שם עסק").default("רהיטי אשר"),
   businessPhone: trimmed(40).default(""),
   businessAddress: trimmed(200).default(""),
 });
 export type ShopSettings = z.infer<typeof settingsSchema>;
+
+export const settingsPatchSchema = z.object({
+  businessName: trimmed(120).min(1, "יש להזין שם עסק").optional(),
+  businessPhone: trimmed(40).optional(),
+  businessAddress: trimmed(200).optional(),
+});
 
 export type ArchiveFilter = "exclude" | "only" | "all";
 
