@@ -15,7 +15,7 @@ export function Stepper({
 }) {
   return (
     <>
-      <div className="md:hidden">
+      <div className="lg:hidden">
         <div className="mb-1 flex items-center justify-between text-sm font-semibold text-ink-600">
           <span>
             שלב {current} מתוך {WIZARD_STEPS.length}
@@ -27,7 +27,7 @@ export function Stepper({
         </div>
       </div>
 
-      <ol className="hidden items-center gap-1 md:flex" aria-label="שלבי האשף">
+      <ol className="hidden items-center gap-1 lg:flex" aria-label="שלבי האשף">
         {WIZARD_STEPS.map((s) => {
           const done = s.n < current;
           const active = s.n === current;
