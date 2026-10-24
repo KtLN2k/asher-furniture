@@ -7,7 +7,13 @@ import { formatDate } from "@/lib/format";
 import { CategoryArt, PlaceholderArt } from "../illustrations/category-art";
 import { StatusBadge } from "../ui/status-badge";
 
-export function ProjectThumb({ project, className }: { project: Pick<ProjectSummary, "category">; className?: string }) {
+export function ProjectThumb({ project, className }: { project: Pick<ProjectSummary, "category"> & { thumbnail?: string | null }; className?: string }) {
+  if (project.thumbnail) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element -- תמונה מקומית (data URL) מההדמיה, אין מה לייעל
+      <img src={project.thumbnail} alt="" data-testid="project-thumbnail" className={`${className ?? ""} object-cover`} />
+    );
+  }
   return project.category ? (
     <CategoryArt category={project.category} className={className} />
   ) : (

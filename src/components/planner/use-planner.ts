@@ -7,6 +7,7 @@ import type { Limits } from "@/domain/limits";
 import { fixMaterials, type Library } from "@/domain/materials";
 import { validateDesign, type Issue } from "@/domain/validation";
 import { useLibrary } from "@/lib/use-library";
+import { roomOf, type RoomKey } from "@/domain/rooms";
 import type { Project } from "@/domain/project";
 import type { ProjectSession } from "@/lib/use-project-session";
 
@@ -21,6 +22,11 @@ export interface Planner {
   apply: (patch: SectionPatch) => void;
   /** מוכן לעריכה: יש קטגוריה, מידות וחומרים. */
   ready: boolean;
+  /** חדר ההדמיה שנבחר, ושמירת בחירה חדשה בפרויקט. */
+  room: RoomKey;
+  setRoom: (room: RoomKey) => void;
+  /** שומר תמונה ממוזערת מההדמיה האחרונה על הפרויקט. */
+  saveThumbnail: (dataUrl: string) => void;
 }
 
 /** מחבר את מודל העיצוב של הפרויקט לספרייה, למגבלות ולבדיקות התקינות. */
@@ -32,6 +38,8 @@ export function usePlanner(session: ProjectSession, project: Project | null, act
   const { update } = session;
 
   const apply = useCallback((patch: SectionPatch) => update({ design: patch }), [update]);
+  const setRoom = useCallback((room: RoomKey) => update({ design: { presentation: { room } } }), [update]);
+  const saveThumbnail = useCallback((thumbnail: string) => update({ thumbnail }), [update]);
 
   const issues = useMemo(() => validateDesign(design, { limits: lib.limits, library: lib.library }), [design, lib.limits, lib.library]);
 
@@ -58,6 +66,9 @@ export function usePlanner(session: ProjectSession, project: Project | null, act
     libraryError: lib.error,
     issues,
     apply,
+    room: roomOf(design.presentation),
+    setRoom,
+    saveThumbnail,
     ready: Boolean(design.category && design.dimensions && design.materials),
   };
 }

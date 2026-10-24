@@ -213,7 +213,8 @@ test.describe("תכנון רהיט מלא", () => {
     expect(file.suggestedFilename()).toMatch(/\.png$/);
 
     await page.getByTestId("viewer-room").click();
-    await expect(page.getByTestId("viewer-room")).toHaveAttribute("aria-pressed", "false");
+    await page.getByTestId("room-off").click();
+    await expect(page.getByTestId("viewer")).toHaveAttribute("data-room", "off");
   });
 
   test("מגירות בתוך הרהיט נראות רק בדלתות פתוחות, ובשידה הן בחזית", async ({ page, request }) => {

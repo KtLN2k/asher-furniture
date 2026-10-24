@@ -24,7 +24,7 @@ export function PreviewPanel({ planner, name, desktop }: { planner: Planner; nam
   }, [expanded]);
 
   if (!planner.ready) return null;
-  const common = { design: planner.design, library: planner.library, name };
+  const common = { design: planner.design, library: planner.library, name, room: planner.room, onRoomChange: planner.setRoom, onRendered: planner.saveThumbnail };
 
   if (expanded) {
     return createPortal(

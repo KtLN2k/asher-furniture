@@ -76,6 +76,8 @@ export const projectPatchSchema = z.object({
   notes: trimmed(4000).optional(),
   wizardStep: z.number().int().min(1).max(20).optional(),
   archived: z.boolean().optional(),
+  /** תמונה ממוזערת מההדמיה האחרונה (data URL של תמונה קטנה). null מוחק. */
+  thumbnail: z.string().startsWith("data:image/").max(250_000, "התמונה הממוזערת גדולה מדי").nullable().optional(),
   design: designPatchSchema.optional(),
 });
 export type ProjectPatch = z.infer<typeof projectPatchSchema>;

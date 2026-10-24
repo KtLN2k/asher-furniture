@@ -19,6 +19,10 @@ export interface MaterialSpec {
   roughness: number;
   metalness: number;
   opacity: number;
+  /** כמות שכבת הלק (0–1): נגזרת מחספוס הגימור. */
+  clearcoat?: number;
+  /** גימור מבריק: מקבל מפת השתקפות של החדר. */
+  reflective?: boolean;
 }
 
 export type Grain = "x" | "y" | "z";
@@ -38,6 +42,8 @@ export interface BoxNode {
   edge?: MaterialSpec;
   grain: Grain;
   shadow: boolean;
+  /** קצוות מעוגלים קלות (חזיתות): מחזירים אור בקצה כמו לוח אמיתי. */
+  bevel?: boolean;
 }
 
 export interface CylinderNode {
@@ -101,7 +107,10 @@ const v3 = (x: number, y: number, z: number): Vec3 => [m(x), m(y), m(z)];
 function mat(kind: MaterialKind, hex: string, roughness: number, extra: Partial<MaterialSpec> = {}): MaterialSpec {
   const metalness = extra.metalness ?? (kind === "metal" ? 1 : kind === "mirror" ? 1 : 0);
   const opacity = extra.opacity ?? 1;
-  return { key: `${kind}|${hex}|${extra.texture ?? ""}|${roughness}|${metalness}|${opacity}`, kind, hex, roughness, metalness, opacity, ...extra };
+  const surface = kind === "matte" || kind === "wood";
+  const clearcoat = surface ? Math.min(0.6, Math.max(0.04, (0.72 - roughness) * 0.9)) : undefined;
+  const reflective = surface ? roughness <= 0.45 : undefined;
+  return { key: `${kind}|${hex}|${extra.texture ?? ""}|${roughness}|${metalness}|${opacity}`, kind, hex, roughness, metalness, opacity, clearcoat, reflective, ...extra };
 }
 
 function shade(hex: string, factor: number): string {
@@ -221,7 +230,7 @@ export function buildFurnitureModel(design: FurnitureDesign, opts: ModelOptions)
     const out: ModelNode[] = [];
     const edge = { ...base, key: `${base.key}|edge`, hex: shade(base.hex, 0.6) };
     const part = (suffix: string, sx: number, sy: number, sz: number, px: number, py: number, pz: number, material: MaterialSpec, extra: Partial<BoxNode> = {}) =>
-      out.push(box(`${kind}-${suffix}`, v3(sx, sy, sz), v3(px, py, pz), material, "y", material === base ? { edge, ...extra } : extra));
+      out.push(box(`${kind}-${suffix}`, v3(sx, sy, sz), v3(px, py, pz), material, "y", material === base ? { edge, bevel: true, ...extra } : extra));
     switch (look.style) {
       case "framed": {
         const fw = Math.min(70, w / 4, h / 4);
@@ -366,8 +375,8 @@ export function buildHandle(look: ResolvedFacade, r: HandleRect, nid: (k: string
   const edgeX = r.freeEdge === "left" ? r.x0 + inset : r.freeEdge === "right" ? r.x1 - inset : cx;
   const edgeY = r.freeEdge === "bottom" ? r.y0 + inset : r.freeEdge === "top" ? r.y1 - inset : cy;
 
-  const addBox = (kind: string, size: Vec3, pos: Vec3, material: MaterialSpec, shadow = true): void => {
-    out.push({ type: "box", id: nid(kind), kind, size, pos, material, grain: "y", shadow });
+  const addBox = (kind: string, size: Vec3, pos: Vec3, material: MaterialSpec, shadow = true, bevel = false): void => {
+    out.push({ type: "box", id: nid(kind), kind, size, pos, material, grain: "y", shadow, bevel });
   };
   const addCyl = (kind: string, radius: number, length: number, axis: "x" | "y" | "z", pos: Vec3, material: MaterialSpec): void => {
     out.push({ type: "cylinder", id: nid(kind), kind, radius, length, axis, pos, material });
@@ -420,8 +429,10 @@ export function buildHandle(look: ResolvedFacade, r: HandleRect, nid: (k: string
   const len = isLong ? Math.max(300, Math.min(h * 0.5, 1300)) : 160;
   const y = handleY(look, r, len / 2 + 30);
   if (isLong) {
-    const x = r.freeEdge === "left" ? r.x0 + 14 : r.x1 - 14;
-    addBox("handle", v3(10, len, 12), v3(x + (r.freeEdge === "left" ? -2 : 2), y, r.faceZ + 6), metal);
+    const dir = r.freeEdge === "left" ? 1 : -1;
+    const edge = r.freeEdge === "left" ? r.x0 : r.x1;
+    addBox("handle", v3(6, len, 14), v3(edge + dir * 5, y, r.faceZ + 7), metal, true, true);
+    addBox("handle", v3(13, len, 2.6), v3(edge + dir * 8.5, y, r.faceZ + 12.7), metal, true, true);
     return out;
   }
   addCyl("handle", 0.006, m(len), "y", v3(edgeX, y, zBar), metal);

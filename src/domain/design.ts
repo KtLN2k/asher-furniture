@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { CATEGORY_KEYS } from "./catalog";
+import { presentationSchema } from "./rooms";
 
 /**
  * המודל המרכזי של רהיט. מסמך JSON אחד לכל פריט רהיט, גרסתי (schemaVersion).
@@ -104,6 +105,7 @@ const designSections = {
   interior: interiorSchema,
   facades: facadesSchema,
   materials: materialsSelectionSchema,
+  presentation: presentationSchema,
   notes: z.string().max(4000),
 };
 
@@ -115,6 +117,7 @@ export const designSchema = z.object({
   interior: designSections.interior.optional(),
   facades: designSections.facades.optional(),
   materials: designSections.materials.optional(),
+  presentation: designSections.presentation.optional(),
   notes: designSections.notes.optional(),
 });
 
@@ -127,6 +130,7 @@ export const DESIGN_SECTIONS = [
   "interior",
   "facades",
   "materials",
+  "presentation",
   "notes",
 ] as const;
 
@@ -138,6 +142,7 @@ export const designPatchSchema = z.object({
   interior: designSections.interior.optional(),
   facades: designSections.facades.optional(),
   materials: designSections.materials.optional(),
+  presentation: designSections.presentation.optional(),
   notes: designSections.notes.optional(),
 });
 export type DesignPatch = z.infer<typeof designPatchSchema>;
