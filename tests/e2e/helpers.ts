@@ -21,7 +21,7 @@ export async function seedCustomer(request: APIRequestContext, name: string, pho
   return (await res.json()).customer as { id: string; name: string };
 }
 
-export const saved = (page: Page) => expect(page.getByTestId("save-status")).toHaveAttribute("data-state", "saved");
+export const saved = (page: Page) => expect(page.getByTestId("save-status")).toHaveAttribute("data-state", "saved", { timeout: 25_000 });
 
 export function projectIdFromUrl(page: Page): string {
   const m = page.url().match(/\/projects\/([0-9a-f-]{36})\//);

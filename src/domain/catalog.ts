@@ -64,7 +64,7 @@ export const WIZARD_STEPS: readonly WizardStepDef[] = [
   { n: 4, key: "interior", title: "חלוקה פנימית", subtitle: "בחרו את הסידור הפנימי", implemented: true },
   { n: 5, key: "facades", title: "חזיתות, דלתות וידיות", subtitle: "בחרו סוג דלת, סגנון וידית", implemented: true },
   { n: 6, key: "materials", title: "חומרים וגימורים", subtitle: "בחרו חומר, צבע וגימור", implemented: true },
-  { n: 7, key: "summary", title: "סיכום ושמירה", subtitle: "צפו בתוצאה, שמרו ושלחו ללקוח", implemented: true },
+  { n: 7, key: "summary", title: "סיכום ושמירה", subtitle: "צפו בתוצאה ובדקו את כל הפרטים", implemented: true },
 ] as const;
 
 export const TOTAL_STEPS = WIZARD_STEPS.length;

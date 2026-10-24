@@ -31,7 +31,7 @@ test.describe("יצירה, שמירה ופתיחה מחדש", () => {
 
     await page.getByRole("button", { name: "המשך" }).click();
     await expect(page.getByRole("heading", { name: "מידות ומבנה" })).toBeVisible();
-    await expect(page.getByTestId("step-placeholder")).toBeVisible();
+    await expect(page.getByTestId("step-dimensions")).toBeVisible();
     await saved(page);
 
     await page.reload();

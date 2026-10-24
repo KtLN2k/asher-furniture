@@ -136,7 +136,7 @@ export default function FurnitureViewer({ design, library, name, compact, classN
   }
 
   const btn = "inline-flex items-center justify-center gap-1.5 rounded-full bg-white/92 px-3 text-sm font-semibold text-ink-900 shadow-card backdrop-blur transition hover:bg-white active:scale-95";
-  const h = compact ? "min-h-10" : "min-h-11";
+  const h = "min-h-11 min-w-11";
 
   return (
     <div
@@ -201,7 +201,7 @@ export default function FurnitureViewer({ design, library, name, compact, classN
           ))}
         </div>
         {onExpand && (
-          <button type="button" onClick={onExpand} aria-label={expanded ? "סגירת התצוגה המוגדלת" : "הגדלת התצוגה"} data-testid="viewer-expand" className={cn(btn, h, "pointer-events-auto size-10 px-0")}>
+          <button type="button" onClick={onExpand} aria-label={expanded ? "סגירת התצוגה המוגדלת" : "הגדלת התצוגה"} data-testid="viewer-expand" className={cn(btn, h, "pointer-events-auto size-11 px-0")}>
             {expanded ? <Minimize2 className="size-5" aria-hidden /> : <Maximize2 className="size-5" aria-hidden />}
           </button>
         )}

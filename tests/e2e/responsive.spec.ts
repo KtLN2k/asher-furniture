@@ -40,7 +40,8 @@ async function smallTargets(page: Page) {
       if (cs.display === "none" || cs.visibility === "hidden") return;
       if (el.classList.contains("sr-only")) return;
       if (getComputedStyle(el, "::after").position === "absolute" && el.tagName === "A") return;
-      const r = el.getBoundingClientRect();
+      const hit = el instanceof HTMLInputElement && (el.type === "checkbox" || el.type === "radio") ? (el.closest("label") ?? el) : el;
+      const r = hit.getBoundingClientRect();
       if (!r.width || !r.height) return;
       if (r.width < 43.5 || r.height < 43.5) {
         bad.push(`${el.tagName} "${(el.getAttribute("aria-label") || el.textContent || "").trim().slice(0, 30)}" ${Math.round(r.width)}x${Math.round(r.height)}`);
@@ -51,6 +52,10 @@ async function smallTargets(page: Page) {
 }
 
 let projectId = "";
+
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("asher:quality", "low"));
+});
 
 test.beforeAll(async ({ request }) => {
   const customer = await seedCustomer(request, uid("משפחת לוי"), "050-1234567");
@@ -78,6 +83,9 @@ for (const vp of VIEWPORTS) {
       ["wizard-step1", () => `/projects/${projectId}/wizard?step=1`, "פרטי פרויקט"],
       ["wizard-step2", () => `/projects/${projectId}/wizard?step=2`, "סוג רהיט"],
       ["wizard-step3", () => `/projects/${projectId}/wizard?step=3`, "מידות ומבנה"],
+      ["wizard-step4", () => `/projects/${projectId}/wizard?step=4`, "חלוקה פנימית"],
+      ["wizard-step5", () => `/projects/${projectId}/wizard?step=5`, "חזיתות, דלתות וידיות"],
+      ["wizard-step6", () => `/projects/${projectId}/wizard?step=6`, "חומרים וגימורים"],
       ["wizard-step7", () => `/projects/${projectId}/wizard?step=7`, "סיכום ושמירה"],
     ];
 
@@ -88,6 +96,7 @@ for (const vp of VIEWPORTS) {
         if (name === "projects") await expect(page.getByTestId("project-card").first()).toBeVisible();
         if (name === "customers") await expect(page.getByTestId("customer-card").first()).toBeVisible();
         if (name.startsWith("wizard") && name !== "wizard-new") await expect(page.getByTestId("save-status")).toBeVisible();
+        if (/step[3-7]/.test(name)) await expect(page.getByTestId("viewer")).toHaveAttribute("data-ready", "true", { timeout: 45_000 });
         await page.waitForTimeout(250);
 
         expect(await page.evaluate(() => [document.dir, document.documentElement.lang])).toEqual(["rtl", "he"]);

@@ -4,7 +4,7 @@ const PORT = 3100;
 
 export default defineConfig({
   testDir: "tests/e2e",
-  timeout: 60_000,
+  timeout: 120_000,
   expect: { timeout: 10_000 },
   fullyParallel: false,
   workers: 1,
@@ -16,6 +16,9 @@ export default defineConfig({
     timezoneId: "Asia/Jerusalem",
     screenshot: "only-on-failure",
     trace: "retain-on-failure",
+    launchOptions: {
+      args: ["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"],
+    },
   },
   projects: [
     { name: "phone", testIgnore: /responsive/, use: { viewport: { width: 412, height: 915 }, hasTouch: true, isMobile: true } },
