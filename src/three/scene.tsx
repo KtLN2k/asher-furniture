@@ -71,7 +71,7 @@ function fitDistance(model: FurnitureModel, view: ViewKey, aspect: number): numb
   const byH = h / 2 / t;
   const byW = w / 2 / (t * aspect);
   const extra = view === "front" ? depth / 2 : view === "side" ? width * 0.0 : 0;
-  return Math.max(byH, byW) * 1.34 + extra + 0.35;
+  return Math.max(byH, byW) * (byW > byH ? 1.12 : 1.34) + extra + 0.35;
 }
 
 interface Props {
