@@ -2,6 +2,14 @@ import { randomUUID } from "node:crypto";
 import type { Db } from "../db/types";
 import { emptyDesign, mergeDesign, type FurnitureDesign } from "@/domain/design";
 import type { CategoryKey, ProjectStatus } from "@/domain/catalog";
+import { limitsProblem, limitsSchema, resolveLimits, type Limits } from "@/domain/limits";
+import {
+  validateAttrs,
+  type LibraryItem,
+  type LibraryKind,
+  type MaterialCreateInput,
+  type MaterialPatchInput,
+} from "@/domain/materials";
 import {
   settingsSchema,
   type Customer,
@@ -321,4 +329,87 @@ export class SqlRepository implements Repository {
     );
     return next;
   }
+
+  async listMaterials(): Promise<LibraryItem[]> {
+    const rows = await this.db.query<Row>(`SELECT * FROM materials ORDER BY sort, name, id`);
+    return rows.map(toMaterial);
+  }
+
+  async createMaterial(input: MaterialCreateInput): Promise<LibraryItem> {
+    const id = input.id ?? `${input.kind}-${randomUUID().slice(0, 8)}`;
+    if ((await this.db.query(`SELECT 1 FROM materials WHERE id = $1`, [id])).length) {
+      throw new ValidationError("כבר קיים פריט עם המזהה הזה");
+    }
+    const sort = (await this.db.query<{ m: number }>(`SELECT COALESCE(max(sort), 0)::int + 10 AS m FROM materials`))[0].m;
+    const rows = await this.db.query<Row>(
+      `INSERT INTO materials (id, kind, name, attrs, active, sort) VALUES ($1,$2,$3,$4::jsonb,$5,$6) RETURNING *`,
+      [id, input.kind, input.name, JSON.stringify(input.attrs), input.active ?? true, sort],
+    );
+    return toMaterial(rows[0]);
+  }
+
+  async updateMaterial(id: string, patch: MaterialPatchInput): Promise<LibraryItem> {
+    const cur = (await this.db.query<Row>(`SELECT * FROM materials WHERE id = $1`, [id]))[0];
+    if (!cur) throw new NotFoundError("הפריט");
+    if (patch.attrs) {
+      const bad = validateAttrs(cur.kind as LibraryKind, patch.attrs);
+      if (bad) throw new ValidationError(bad);
+    }
+    const rows = await this.db.query<Row>(
+      `UPDATE materials SET name = COALESCE($2, name), active = COALESCE($3, active), attrs = COALESCE($4::jsonb, attrs)
+       WHERE id = $1 RETURNING *`,
+      [id, patch.name ?? null, patch.active ?? null, patch.attrs ? JSON.stringify(patch.attrs) : null],
+    );
+    return toMaterial(rows[0]);
+  }
+
+  async deleteMaterial(id: string): Promise<boolean> {
+    const used = await this.db.query<{ n: number }>(
+      `SELECT count(DISTINCT project_id)::int AS n FROM furniture_items WHERE position($1 in spec::text) > 0`,
+      [`"${id}"`],
+    );
+    if (used[0].n > 0) {
+      throw new ValidationError(`הפריט בשימוש ב-${used[0].n} פרויקטים. אפשר להשבית אותו במקום למחוק.`);
+    }
+    const rows = await this.db.query<Row>(`DELETE FROM materials WHERE id = $1 RETURNING kind`, [id]);
+    if (!rows.length) return false;
+    if (rows[0].kind === "finish") {
+      await this.db.query(
+        `UPDATE materials SET attrs = jsonb_set(attrs, '{finishIds}', COALESCE((SELECT jsonb_agg(v) FROM jsonb_array_elements(attrs->'finishIds') v WHERE v #>> '{}' <> $1), '[]'::jsonb))
+         WHERE kind IN ('board','facade') AND attrs ? 'finishIds'`,
+        [id],
+      );
+    }
+    return true;
+  }
+
+  async getLimits(): Promise<Limits> {
+    const rows = await this.db.query<{ value: unknown }>(`SELECT value FROM settings WHERE key = 'limits'`);
+    return resolveLimits(rows[0]?.value);
+  }
+
+  async updateLimits(limits: Limits): Promise<Limits> {
+    const parsed = limitsSchema.safeParse(limits);
+    if (!parsed.success) throw new ValidationError("המגבלות אינן תקינות. בדקו שכל השדות מספרים חיוביים.");
+    const problem = limitsProblem(parsed.data);
+    if (problem) throw new ValidationError(problem);
+    await this.db.query(
+      `INSERT INTO settings (key, value) VALUES ('limits', $1::jsonb)
+       ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = now()`,
+      [JSON.stringify(parsed.data)],
+    );
+    return parsed.data;
+  }
+}
+
+function toMaterial(r: Row): LibraryItem {
+  return {
+    id: r.id as string,
+    kind: r.kind as LibraryKind,
+    name: r.name as string,
+    active: r.active as boolean,
+    sort: r.sort as number,
+    attrs: (r.attrs as Record<string, unknown>) ?? {},
+    unitPrice: r.unit_price == null ? null : Number(r.unit_price),
+  };
 }

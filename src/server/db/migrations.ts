@@ -1,3 +1,5 @@
+import { SEED_LIBRARY } from "@/domain/materials";
+
 export interface Migration {
   id: string;
   sql: string;
@@ -88,4 +90,17 @@ CREATE TABLE settings (
 );
 `,
   },
+  {
+    id: "002_seed_materials",
+    sql: seedMaterialsSql(),
+  },
 ];
+
+/** ספריית חומרים התחלתית (דוגמאות לעריכה בהגדרות). */
+function seedMaterialsSql(): string {
+  const q = (v: string) => `'${v.replace(/'/g, "''")}'`;
+  const rows = SEED_LIBRARY.map(
+    (m, i) => `(${q(m.id)}, ${q(m.kind)}, ${q(m.name)}, ${q(JSON.stringify(m.attrs))}::jsonb, ${(i + 1) * 10})`,
+  );
+  return `INSERT INTO materials (id, kind, name, attrs, sort) VALUES\n${rows.join(",\n")}\nON CONFLICT (id) DO NOTHING;\n`;
+}

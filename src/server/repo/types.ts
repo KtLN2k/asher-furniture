@@ -1,3 +1,5 @@
+import type { Limits } from "@/domain/limits";
+import type { LibraryItem, MaterialCreateInput, MaterialPatchInput } from "@/domain/materials";
 import type {
   Customer,
   CustomerInput,
@@ -54,4 +56,13 @@ export interface Repository {
 
   getSettings(): Promise<ShopSettings>;
   updateSettings(patch: Partial<ShopSettings>): Promise<ShopSettings>;
+
+  listMaterials(): Promise<LibraryItem[]>;
+  createMaterial(input: MaterialCreateInput): Promise<LibraryItem>;
+  updateMaterial(id: string, patch: MaterialPatchInput): Promise<LibraryItem>;
+  /** מחיקה נחסמת כשהפריט בשימוש בפרויקט (ValidationError); אפשר להשבית במקום. */
+  deleteMaterial(id: string): Promise<boolean>;
+
+  getLimits(): Promise<Limits>;
+  updateLimits(limits: Limits): Promise<Limits>;
 }

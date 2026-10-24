@@ -1,3 +1,5 @@
+import type { Limits } from "@/domain/limits";
+import type { LibraryItem, MaterialCreateInput, MaterialPatchInput } from "@/domain/materials";
 import type {
   Customer,
   CustomerInput,
@@ -81,4 +83,14 @@ export const api = {
   getSettings: () => request<{ settings: ShopSettings }>("GET", "/api/settings").then((r) => r.settings),
   updateSettings: (patch: Partial<ShopSettings>) =>
     request<{ settings: ShopSettings }>("PUT", "/api/settings", patch).then((r) => r.settings),
+
+  listMaterials: () => request<{ materials: LibraryItem[] }>("GET", "/api/materials").then((r) => r.materials),
+  createMaterial: (input: MaterialCreateInput) =>
+    request<{ material: LibraryItem }>("POST", "/api/materials", input).then((r) => r.material),
+  patchMaterial: (id: string, patch: MaterialPatchInput) =>
+    request<{ material: LibraryItem }>("PATCH", `/api/materials/${id}`, patch).then((r) => r.material),
+  deleteMaterial: (id: string) => request<{ ok: true }>("DELETE", `/api/materials/${id}`),
+
+  getLimits: () => request<{ limits: Limits }>("GET", "/api/limits").then((r) => r.limits),
+  updateLimits: (limits: Limits) => request<{ limits: Limits }>("PUT", "/api/limits", limits).then((r) => r.limits),
 };
